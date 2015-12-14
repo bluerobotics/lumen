@@ -58,6 +58,7 @@ THE SOFTWARE.
 // SIGNAL CHARACTERISTICS
 #define PULSE_MIN 1100 // microseconds
 #define PULSE_MAX 1900 // microseconds
+#define PERIOD_MAX 100000ul // microseconds
 
 int16_t signal;
 int16_t pwm;
@@ -69,7 +70,7 @@ void setup() {
 }
 
 void loop() {
-  signal = pulseIn(SIGNAL_PIN,HIGH,100000ul);
+  signal = pulseIn(SIGNAL_PIN,HIGH,PERIOD_MAX);
 
   if ( signal == 0 ) {
     if ( digitalRead(SIGNAL_PIN) == HIGH ) {
