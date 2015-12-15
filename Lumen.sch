@@ -11298,7 +11298,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <parts>
 <part name="U1" library="SparkFun-DigitalIC" deviceset="ATTINY45" device="TINY45-20-SMT" value="Tiny45-20-SMT"/>
 <part name="U$1" library="BlueRobotics-Main" deviceset="A6211" device=""/>
-<part name="FRAME1" library="BlueRobotics-Main" deviceset="FRAME-BLUEROBOTICS" device="" value="µC and LED Driver"/>
+<part name="FRAME1" library="BlueRobotics-Main" deviceset="FRAME-BLUEROBOTICS" device="" value="Microcontroller and LED Driver"/>
 <part name="U$2" library="BlueRobotics-Main" deviceset="LED-MK-R" device=""/>
 <part name="C3" library="SparkFun-Capacitors" deviceset="CAP_POL" device="PTH1" value="47uF 63V"/>
 <part name="U$3" library="BlueRobotics-Main" deviceset="INDUCTOR" device="8040" value="10uH"/>
@@ -11346,7 +11346,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <part name="R6" library="resistor" deviceset="R-US_" device="R0603" value="27K"/>
 <part name="GND14" library="supply1" deviceset="GND" device=""/>
 <part name="C7" library="resistor" deviceset="C-EU" device="C0603" value="NP"/>
-<part name="R7" library="resistor" deviceset="R-US_" device="R0603" value="NP"/>
+<part name="R7" library="resistor" deviceset="R-US_" device="R1206" value="NP"/>
 </parts>
 <sheets>
 <sheet>
@@ -11386,10 +11386,10 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <instance part="U$7" gate="G$1" x="33.02" y="149.86"/>
 <instance part="U$8" gate="G$1" x="33.02" y="142.24"/>
 <instance part="U$9" gate="G$1" x="33.02" y="134.62"/>
-<instance part="R4" gate="G$1" x="205.74" y="73.66" rot="R90"/>
-<instance part="R5" gate="G$1" x="205.74" y="55.88" rot="R90"/>
-<instance part="GND9" gate="1" x="205.74" y="45.72"/>
-<instance part="P+1" gate="VCC" x="205.74" y="83.82"/>
+<instance part="R4" gate="G$1" x="165.1" y="73.66" rot="R90"/>
+<instance part="R5" gate="G$1" x="165.1" y="55.88" rot="R90"/>
+<instance part="GND9" gate="1" x="165.1" y="45.72"/>
+<instance part="P+1" gate="VCC" x="165.1" y="83.82"/>
 <instance part="P+2" gate="VCC" x="40.64" y="78.74"/>
 <instance part="P+3" gate="VCC" x="68.58" y="101.6"/>
 <instance part="GND10" gate="1" x="68.58" y="81.28"/>
@@ -11470,7 +11470,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <segment>
 <pinref part="GND9" gate="1" pin="GND"/>
 <pinref part="R5" gate="G$1" pin="1"/>
-<wire x1="205.74" y1="48.26" x2="205.74" y2="50.8" width="0.1524" layer="91"/>
+<wire x1="165.1" y1="48.26" x2="165.1" y2="50.8" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="GND12" gate="1" pin="GND"/>
@@ -11679,7 +11679,7 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <segment>
 <pinref part="R4" gate="G$1" pin="2"/>
 <pinref part="P+1" gate="VCC" pin="VCC"/>
-<wire x1="205.74" y1="78.74" x2="205.74" y2="81.28" width="0.1524" layer="91"/>
+<wire x1="165.1" y1="78.74" x2="165.1" y2="81.28" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="C8" gate="G$1" pin="1"/>
@@ -11744,11 +11744,11 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <segment>
 <pinref part="R5" gate="G$1" pin="2"/>
 <pinref part="R4" gate="G$1" pin="1"/>
-<wire x1="205.74" y1="60.96" x2="205.74" y2="66.04" width="0.1524" layer="91"/>
-<wire x1="205.74" y1="66.04" x2="205.74" y2="68.58" width="0.1524" layer="91"/>
-<wire x1="205.74" y1="66.04" x2="223.52" y2="66.04" width="0.1524" layer="91"/>
-<junction x="205.74" y="66.04"/>
-<label x="210.82" y="66.04" size="1.778" layer="95"/>
+<wire x1="165.1" y1="60.96" x2="165.1" y2="66.04" width="0.1524" layer="91"/>
+<wire x1="165.1" y1="66.04" x2="165.1" y2="68.58" width="0.1524" layer="91"/>
+<wire x1="165.1" y1="66.04" x2="182.88" y2="66.04" width="0.1524" layer="91"/>
+<junction x="165.1" y="66.04"/>
+<label x="170.18" y="66.04" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="EXT" class="0">

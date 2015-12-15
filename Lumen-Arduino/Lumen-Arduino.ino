@@ -98,6 +98,8 @@ void loop() {
   }
   
   analogWrite(LED_PIN, constrain(pwm+tempAdjust,0,MAX_LED));
+
+  delay(100);
 }
 
 float readTemperature() {
