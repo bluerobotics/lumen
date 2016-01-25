@@ -34,23 +34,15 @@ THE SOFTWARE.
 #define LED_PIN 1
 #define TEMP_PIN 2
 
-// THERMISTOR SPECIFICATIONS
-// resistance at 25 degrees C
-#define THERMISTORNOMINAL 10000      
-// temp. for nominal resistance (almost always 25 C)
-#define TEMPERATURENOMINAL 25   
-// The beta coefficient of the thermistor (usually 3000-4000)
-#define BCOEFFICIENT 3900
-// the value of the 'other' resistor
-#define SERIESRESISTOR 3300 
-
 // DIMMING CHARACTERISTICS
 // Temp to start dimming the lights at
-#define DIM_TEMP 75 // Deg C
+#define DIM_ADC 355 // 355 for 70C
 // Temp to shut off
-#define MAX_TEMP 95 // Deg C
+#define MIN_ADC 235 // 235 for 90C
+// Steinhart slope near values of interest
+#define SLOPE (-7) // ADC steps per degree (7.5)
 // Dimming gain
-#define DIM_GAIN -10 // 255ths of a percent per degree C of overage
+#define DIM_GAIN -10 // 255ths of max power per degree of overtemp
 
 // OUTPUT LIMIT
 #define MAX_LED 255
@@ -60,7 +52,7 @@ THE SOFTWARE.
 #define PULSE_MAX 1900 // microseconds
 #define PERIOD_MAX 100000ul // microseconds
 
-int16_t signal;
+int16_t signal = 1100;
 int16_t pwm;
 int16_t tempAdjust;
 
@@ -70,7 +62,7 @@ void setup() {
 }
 
 void loop() {
-  signal = pulseIn(SIGNAL_PIN,HIGH,PERIOD_MAX);
+  pulseIn(SIGNAL_PIN,HIGH,PERIOD_MAX);
 
   if ( signal == 0 ) {
     if ( digitalRead(SIGNAL_PIN) == HIGH ) {
@@ -86,33 +78,27 @@ void loop() {
     pwm = map(signal,PULSE_MIN,PULSE_MAX,0,0xFF);
   }
 
-  float temp = readTemperature();
-
-  if ( temp > MAX_TEMP ) {
-    pwm = 10; // Minimal level so you can tell it's turned on.
-    tempAdjust = 0;
-  } else if ( temp >= DIM_TEMP ) {
-    tempAdjust = (temp-DIM_TEMP)*DIM_GAIN;  
+  if ( signal > 0 ) {
+    float tempADC = analogRead(TEMP_PIN);
+  
+    if ( tempADC < MIN_ADC && signal ) {
+      pwm = 10; // Minimal level so you can tell it's turned on.
+    } else if ( tempADC <= DIM_ADC ) {
+      tempAdjust = (DIM_ADC-tempADC)*DIM_GAIN/SLOPE;  
+    } else {
+      tempAdjust = 0;
+    }
+  
+    tempAdjust = constrain(tempAdjust,-pwm+10,0);
   } else {
     tempAdjust = 0;
   }
-  
-  analogWrite(LED_PIN, constrain(pwm+tempAdjust,0,MAX_LED));
 
-  delay(100);
-}
+  if ( pwm > 0 ) {
+    analogWrite(LED_PIN, constrain(pwm+tempAdjust,0,MAX_LED));
+  } else {
+    digitalWrite(LED_PIN, LOW);
+  }
 
-float readTemperature() {
-  // This code was taken from an Adafruit
-  float resistance = SERIESRESISTOR/(1023/float(analogRead(TEMP_PIN))-1);
-
-  float steinhart;
-  steinhart = resistance / THERMISTORNOMINAL;  // (R/Ro)
-  steinhart = log(steinhart);                  // ln(R/Ro)
-  steinhart /= BCOEFFICIENT;                   // 1/B * ln(R/Ro)
-  steinhart += 1.0 / (TEMPERATURENOMINAL + 273.15); // + (1/To)
-  steinhart = 1.0 / steinhart;                 // Invert
-  steinhart -= 273.15;                         // convert to C
-
-  return steinhart;
+  delay(50);
 }
