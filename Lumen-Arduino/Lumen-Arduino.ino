@@ -11,7 +11,7 @@ dim the light if it is overheating.
 
 -------------------------------
 The MIT License (MIT)
-Copyright (c) 2015 Blue Robotics Inc.
+Copyright (c) 2016 Blue Robotics Inc.
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -36,26 +36,26 @@ THE SOFTWARE.
 
 // DIMMING CHARACTERISTICS
 // Temp to start dimming the lights at
-#define DIM_ADC 355 // 355 for 70C
-// Temp to shut off
-#define MIN_ADC 200 // 235 for 95C
-// Steinhart slope near values of interest
-#define SLOPE (-7) // ADC steps per degree (7.5)
-// Dimming gain
-#define DIM_GAIN -0.0045 // Percent per degree of overshoot
+#define DIM_ADC 293 // 293 for 80C
+// Dimming gains
+#define DIM_KP 0.30
+#define DIM_KI 0.30
 
 // OUTPUT LIMIT
-#define MAX_LED 255
+#define PWM_MIN 10 // 0-255
+#define PWM_MAX 180 // 0-255 - 180 for about 12W max
 
 // SIGNAL CHARACTERISTICS
 #define PULSE_MIN 1100 // microseconds
 #define PULSE_MAX 1900 // microseconds
 #define PERIOD_MAX 100000ul // microseconds
-#define PWM_MIN 10 // 0-255
 
 int16_t signal = 1100;
 int16_t pwm;
-float tempScale;
+float error;
+float control;
+float dimI;
+float maxPWM = 255;
 
 const float smoothAlpha = 0.03;
 
@@ -65,11 +65,14 @@ void setup() {
 }
 
 void loop() {
+  // Read in PWM signal with low-pass filter for smoothing
   signal = (1-smoothAlpha)*signal + smoothAlpha*pulseIn(SIGNAL_PIN,HIGH,PERIOD_MAX);
 
+  // Determine appropriate output signal. 
   if ( signal == 0 ) {
+    // Allow light to be turned on by tying the signal pin high.
     if ( digitalRead(SIGNAL_PIN) == HIGH ) {
-      pwm = 0xFF;
+      pwm = 0; //0xFF;
     } else {
       pwm = 0;
     }
@@ -78,30 +81,34 @@ void loop() {
   } else if ( signal > PULSE_MAX ) {
     pwm = 0xFF;
   } else {
-    pwm = map(signal,PULSE_MIN,PULSE_MAX,0,0xFF);
+    pwm = map(signal,PULSE_MIN,PULSE_MAX,0,PWM_MAX);
   }
 
-  if ( signal > 10 ) {
-    int16_t tempADC = analogRead(TEMP_PIN);
-  
-    if ( tempADC < MIN_ADC ) {
-      pwm = 15; // Minimal level so you can tell it's turned on.
-    } else if ( tempADC <= DIM_ADC ) {
-      tempScale = 1.0+(DIM_ADC-tempADC)*DIM_GAIN;  
-    } else {
-      tempScale = 1.0f;
-    }
-  
-    tempScale = constrain(tempScale,0.0f,1.0f);
-  } else {
-    tempScale = 1.0f;
+  // PID controller to control max temperature limit. Not a very linear
+  // approach but it works well for this. This will basically control the 
+  // limit to maintain DIM_ADC temperature or better.
+  error = DIM_ADC-analogRead(TEMP_PIN);
+
+  dimI += error*0.005;
+  dimI = constrain(dimI,-255/abs(DIM_KI),255/abs(DIM_KI)); // Limit I-term spooling
+
+  // Reset I after turning LED off
+  if ( pwm == 0 ) {
+    dimI = 0;
   }
 
+  // Build control value
+  control = error*DIM_KP + dimI*DIM_KI;
+
+  // Apply control value to max PWM
+  maxPWM = constrain(255 - control,PWM_MIN,PWM_MAX);
+
+  // Output PWM to LED driver
   if ( pwm > PWM_MIN ) {
-    analogWrite(LED_PIN, constrain(pwm*tempScale,0,MAX_LED));
+    analogWrite(LED_PIN, constrain(pwm,PWM_MIN,maxPWM));
   } else {
     digitalWrite(LED_PIN, LOW);
   }
 
-  delay(5);
+  delay(3);
 }
