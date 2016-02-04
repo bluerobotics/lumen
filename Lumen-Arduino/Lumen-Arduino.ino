@@ -43,7 +43,7 @@ THE SOFTWARE.
 
 // OUTPUT LIMIT
 #define PWM_MIN 10 // 0-255
-#define PWM_MAX 180 // 0-255 - 180 for about 12W max
+#define PWM_MAX 200 // 0-255 - 180 for about 12W max
 
 // SIGNAL CHARACTERISTICS
 #define PULSE_MIN 1100 // microseconds
@@ -57,7 +57,7 @@ float control;
 float dimI;
 float maxPWM = 255;
 
-const float smoothAlpha = 0.03;
+const float smoothAlpha = 0.05;
 
 void setup() {
   pinMode(SIGNAL_PIN,INPUT);
@@ -72,7 +72,7 @@ void loop() {
   if ( signal == 0 ) {
     // Allow light to be turned on by tying the signal pin high.
     if ( digitalRead(SIGNAL_PIN) == HIGH ) {
-      pwm = 0; //0xFF;
+      pwm = PWM_MAX;
     } else {
       pwm = 0;
     }
