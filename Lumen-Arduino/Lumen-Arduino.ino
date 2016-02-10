@@ -69,7 +69,7 @@ void loop() {
   signal = (1-smoothAlpha)*signal + smoothAlpha*pulseIn(SIGNAL_PIN,HIGH,PERIOD_MAX);
 
   // Determine appropriate output signal. 
-  if ( signal == 0 ) {
+  if ( signal < 500 ) {
     // Allow light to be turned on by tying the signal pin high.
     if ( digitalRead(SIGNAL_PIN) == HIGH ) {
       pwm = PWM_MAX;
