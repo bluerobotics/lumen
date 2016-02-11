@@ -62,6 +62,9 @@ const float smoothAlpha = 0.05;
 void setup() {
   pinMode(SIGNAL_PIN,INPUT);
   pinMode(LED_PIN,OUTPUT); 
+
+  // Setup up PWM on output pin: Set prescalar to 8 for 8M/8/256 = 3906 Hz
+  TCCR0B = _BV(CS01); // Set prescalar to 8 for 8M/8/256 = 3906 Hz
 }
 
 void loop() {
