@@ -64,6 +64,7 @@ void setup() {
   pinMode(LED_PIN,OUTPUT); 
 
   // Setup up PWM on output pin: Set prescalar to 8 for 8M/8/256 = 3906 Hz
+  // The default analogWrite frequency can mess with cameras.
   TCCR0B = _BV(CS01); // Set prescalar to 8 for 8M/8/256 = 3906 Hz
 }
 
