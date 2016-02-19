@@ -2,6 +2,7 @@
 
 clear all;
 clc;
+clf;
 
 % THERMISTOR SPECIFICATIONS
 % resistance at 25 degrees C

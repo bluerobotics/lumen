@@ -36,22 +36,23 @@ THE SOFTWARE.
 
 // DIMMING CHARACTERISTICS
 // Temp to start dimming the lights at
-#define DIM_ADC 293 // 293 for 80C
+#define DIM_ADC 320 // 320 for 75C
 // Dimming gains
-#define DIM_KP 0.30
-#define DIM_KI 0.30
+#define DIM_KP 5.0
+#define DIM_KI 0.3
 
 // OUTPUT LIMIT
 #define PWM_MIN 10 // 0-255
-#define PWM_MAX 200 // 0-255 - 180 for about 12W max
+#define PWM_MAX 230 // 0-255 - 230 for about 15W max
 
 // SIGNAL CHARACTERISTICS
-#define PULSE_MIN 1100 // microseconds
-#define PULSE_MAX 1900 // microseconds
+#define PULSE_MIN 1120 // microseconds
+#define PULSE_MAX 1880 // microseconds
 #define PERIOD_MAX 100000ul // microseconds
 
 int16_t signal = 1100;
 int16_t pwm;
+float adc;
 float error;
 float control;
 float dimI;
@@ -91,7 +92,8 @@ void loop() {
   // PID controller to control max temperature limit. Not a very linear
   // approach but it works well for this. This will basically control the 
   // limit to maintain DIM_ADC temperature or better.
-  error = DIM_ADC-analogRead(TEMP_PIN);
+  adc = adc*(1-smoothAlpha) + smoothAlpha*analogRead(TEMP_PIN);
+  error = DIM_ADC-adc;
 
   dimI += error*0.005;
   dimI = constrain(dimI,-255/abs(DIM_KI),255/abs(DIM_KI)); // Limit I-term spooling
