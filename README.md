@@ -54,3 +54,5 @@ The Lumen Subsea Light Hardware Design is released under the MIT License.
 0.0 - Under development
 
 0.1 - First production version
+
+0.11 - First production version w/ software
