@@ -36,10 +36,10 @@ THE SOFTWARE.
 
 // DIMMING CHARACTERISTICS
 // Temp to start dimming the lights at
-#define DIM_ADC 320 // 320 for 75C
+#define DIM_ADC 265 // 265 for 85C board temperature
 // Dimming gains
 #define DIM_KP 5.0
-#define DIM_KI 0.3
+#define DIM_KI 0.5
 
 // OUTPUT LIMIT
 #define PWM_MIN 10 // 0-255
