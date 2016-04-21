@@ -42,15 +42,15 @@ THE SOFTWARE.
 #define DIM_KI 0.5
 
 // OUTPUT LIMIT
-#define PWM_MIN 10 // 0-255
+#define PWM_MIN 20 // 0-255
 #define PWM_MAX 230 // 0-255 - 230 for about 15W max
 
 // SIGNAL CHARACTERISTICS
 #define PULSE_MIN 1120 // microseconds
 #define PULSE_MAX 1880 // microseconds
-#define PERIOD_MAX 100000ul // microseconds
+#define PERIOD_MAX 400000ul // microseconds
 
-int16_t signal = 1100;
+float signal = 1100;
 int16_t pwm;
 float adc;
 float error;
@@ -58,7 +58,44 @@ float control;
 float dimI;
 float maxPWM = 255;
 
-const float smoothAlpha = 0.05;
+const float smoothAlpha = 0.02;
+
+// This function is needed as a consequence of the PixHawk having 3.3V
+// PWM logic as well as noise that gets into the signal from motors. 
+// It listens for a pulse and ignore noise within that pulse, even if 
+// the noise drops to a low logic level momentarily.
+int16_t pulseInNoiseReduced(uint8_t pin,uint32_t maxPeriod) {
+  uint32_t timeoutCounter = micros();
+  uint32_t risingEdge;
+  uint32_t fallingEdge;
+
+  // If we're in the middle of a pulse, wait till it's over
+  if ( digitalRead(pin) == HIGH ) {
+    delayMicroseconds(30000);
+  }
+
+  // Wait for the rising edge
+  while ( micros() - timeoutCounter < maxPeriod ) {
+    if ( digitalRead(pin) == HIGH ) {
+      risingEdge = micros();
+      fallingEdge = risingEdge;
+      break;
+    }
+  }
+
+  // Push back falling edge until it's been low for 50 µs
+  while ( micros() - timeoutCounter < maxPeriod ) {
+    if ( digitalRead(pin) == HIGH ) {
+      fallingEdge = micros();
+    }
+
+    if ( micros() - fallingEdge > 400 ) {
+      return (fallingEdge - risingEdge)/8;
+    }
+  }
+
+  return 0;
+}
 
 void setup() {
   pinMode(SIGNAL_PIN,INPUT);
@@ -71,10 +108,10 @@ void setup() {
 
 void loop() {
   // Read in PWM signal with low-pass filter for smoothing
-  signal = (1-smoothAlpha)*signal + smoothAlpha*pulseIn(SIGNAL_PIN,HIGH,PERIOD_MAX);
+  signal = (1-smoothAlpha)*signal + smoothAlpha*pulseInNoiseReduced(SIGNAL_PIN,PERIOD_MAX);
 
   // Determine appropriate output signal. 
-  if ( signal < 500 ) {
+  if ( signal <= 500 ) {
     // Allow light to be turned on by tying the signal pin high.
     if ( digitalRead(SIGNAL_PIN) == HIGH ) {
       pwm = PWM_MAX;
@@ -84,7 +121,7 @@ void loop() {
   } else if ( signal < PULSE_MIN ) {
     pwm = 0;
   } else if ( signal > PULSE_MAX ) {
-    pwm = 0xFF;
+    pwm = PWM_MAX;
   } else {
     pwm = map(signal,PULSE_MIN,PULSE_MAX,0,PWM_MAX);
   }
@@ -116,5 +153,5 @@ void loop() {
     digitalWrite(LED_PIN, LOW);
   }
 
-  delay(3);
+  delay(1);
 }
