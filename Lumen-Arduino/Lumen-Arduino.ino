@@ -89,7 +89,7 @@ int16_t pulseInNoiseReduced(uint8_t pin,uint32_t maxPeriod) {
       fallingEdge = micros();
     }
 
-    if ( micros() - fallingEdge > 400 ) {
+    if ( micros() - fallingEdge > 4000 ) {
       return (fallingEdge - risingEdge)/8;
     }
   }
