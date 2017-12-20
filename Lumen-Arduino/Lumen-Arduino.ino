@@ -30,33 +30,35 @@ THE SOFTWARE.
 -------------------------------*/ 
 
 // HARDWARE PIN DEFINITIONS
-#define SIGNAL_PIN 0
-#define LED_PIN 1
-#define TEMP_PIN A1
+#define SIGNAL_PIN      0
+#define LED_PIN         1
+#define TEMP_PIN        2                   // A1
 
 // DIMMING CHARACTERISTICS
 // Temp to start dimming the lights at
-#define DIM_ADC 265 // 265 for 85C board temperature
+#define DIM_ADC         265                 // 265 for 85C board temperature
 // Dimming gains
-#define DIM_KP 5.0
-#define DIM_KI 0.5
+#define DIM_KP          5.0
+#define DIM_KI          0.5
 
 // OUTPUT LIMIT
-#define PWM_MIN 20 // 0-255
-#define PWM_MAX 230 // 0-255 - 230 for about 15W max
+#define PWM_MIN         20                  // 0-255
+#define PWM_MAX         230                 // 0-255 - 230 for about 15W max
 
 // SIGNAL CHARACTERISTICS
-#define PULSE_MIN 1120 // microseconds
-#define PULSE_MAX 1880 // microseconds
-#define PERIOD_MAX 400000ul // microseconds
+#define PULSE_FREQ      50                  // Hz
+#define PULSE_PERIOD    1000000/PULSE_FREQ  // microseconds
+#define PULSE_MIN       1120                // microseconds
+#define PULSE_MAX       1880                // microseconds
+#define PERIOD_MAX      400000ul            // microsecondsd
 
-float signal = 1100;
+float   signal = 1100;
 int16_t pwm;
-float adc;
-float error;
-float control;
-float dimI;
-float maxPWM = 255;
+float   adc;
+float   error;
+float   control;
+float   dimI;
+float   maxPWM = 255;
 
 const float smoothAlpha = 0.02;
 
