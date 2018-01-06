@@ -357,21 +357,6 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <text x="-0.9" y="-3.7" size="0.6096" layer="25" rot="R90">&gt;NAME</text>
 <text x="1.6" y="-3.7" size="0.6096" layer="25" rot="R90">&gt;VALUE</text>
 </package>
-<package name="PAD-2X3MM">
-<smd name="P$1" x="0" y="0" dx="3" dy="2" layer="1"/>
-</package>
-<package name="PAD-1.5X3MM">
-<smd name="P$1" x="0" y="0" dx="3" dy="1.5" layer="1"/>
-</package>
-<package name="PAD-PTH-MED-1">
-<pad name="P$1" x="0" y="0" drill="2.2" diameter="3.302"/>
-</package>
-<package name="PAD-PTH-18AWG-1">
-<pad name="P$1" x="0" y="0" drill="1.5" diameter="2.54"/>
-</package>
-<package name="PAD-4X6MM">
-<smd name="P$1" x="0" y="0" dx="4" dy="6" layer="1"/>
-</package>
 <package name="BR-LOGO-MEDIUM">
 <rectangle x1="3.34518125" y1="-0.04241875" x2="4.61518125" y2="0.04241875" layer="21"/>
 <rectangle x1="3.00481875" y1="0.04241875" x2="4.52881875" y2="0.127" layer="21"/>
@@ -1839,21 +1824,6 @@ You are welcome to use this library for commercial purposes. For attribution, we
 <rectangle x1="2.0066" y1="4.445" x2="2.921" y2="4.4958" layer="29"/>
 <rectangle x1="1.9558" y1="4.4958" x2="2.667" y2="4.5466" layer="29"/>
 </package>
-<package name="SOT23-3">
-<wire x1="1.4224" y1="0.6604" x2="1.4224" y2="-0.6604" width="0.1524" layer="51"/>
-<wire x1="1.4224" y1="-0.6604" x2="-1.4224" y2="-0.6604" width="0.1524" layer="51"/>
-<wire x1="-1.4224" y1="-0.6604" x2="-1.4224" y2="0.6604" width="0.1524" layer="51"/>
-<wire x1="-1.4224" y1="0.6604" x2="1.4224" y2="0.6604" width="0.1524" layer="51"/>
-<wire x1="-0.8" y1="0.7" x2="-1.4" y2="0.7" width="0.2032" layer="21"/>
-<wire x1="-1.4" y1="0.7" x2="-1.4" y2="-0.1" width="0.2032" layer="21"/>
-<wire x1="0.8" y1="0.7" x2="1.4" y2="0.7" width="0.2032" layer="21"/>
-<wire x1="1.4" y1="0.7" x2="1.4" y2="-0.1" width="0.2032" layer="21"/>
-<smd name="3" x="0" y="1.1" dx="0.8" dy="0.9" layer="1"/>
-<smd name="2" x="0.95" y="-1" dx="0.8" dy="0.9" layer="1"/>
-<smd name="1" x="-0.95" y="-1" dx="0.8" dy="0.9" layer="1"/>
-<text x="-0.8255" y="1.778" size="0.4064" layer="25">&gt;NAME</text>
-<text x="-1.016" y="-0.1905" size="0.4064" layer="27">&gt;VALUE</text>
-</package>
 <package name="SMA">
 <description>&lt;b&gt;SMA&lt;/b&gt; CASE 403D-02&lt;p&gt;
 Source: http://www.onsemi.com/pub_link/Collateral/MBRA340T3-D.PDF</description>
@@ -1921,6 +1891,53 @@ Source: http://www.onsemi.com/pub_link/Collateral/MBRA340T3-D.PDF</description>
 <rectangle x1="-0.554" y1="-0.3048" x2="-0.254" y2="0.2951" layer="51"/>
 <rectangle x1="0.2588" y1="-0.3048" x2="0.5588" y2="0.2951" layer="51"/>
 <rectangle x1="-0.1999" y1="-0.4001" x2="0.1999" y2="0.4001" layer="35"/>
+</package>
+<package name="ED3101/3">
+<pad name="1B" x="0" y="0" drill="0.8"/>
+<pad name="1A" x="0" y="5" drill="0.8"/>
+<pad name="2A" x="5" y="5" drill="0.8"/>
+<pad name="2B" x="5" y="0" drill="0.8"/>
+<pad name="3B" x="10" y="0" drill="0.8"/>
+<pad name="3A" x="10" y="5" drill="0.8"/>
+<wire x1="-2" y1="-2" x2="-2" y2="7" width="0.127" layer="21"/>
+<wire x1="-2" y1="7" x2="12" y2="7" width="0.127" layer="21"/>
+<wire x1="12" y1="7" x2="12" y2="-2" width="0.127" layer="21"/>
+<wire x1="12" y1="-2" x2="-2" y2="-2" width="0.127" layer="21"/>
+</package>
+<package name="OSTYK33103030">
+<pad name="3" x="-8.25" y="0" drill="1.4" diameter="2.54"/>
+<pad name="2" x="0" y="0" drill="1.4" diameter="2.54"/>
+<pad name="1" x="8.25" y="0" drill="1.4" diameter="2.54"/>
+<wire x1="-13.4" y1="-4.4" x2="13.4" y2="-4.4" width="0.127" layer="21"/>
+<wire x1="-13.4" y1="-4.4" x2="-13.4" y2="10.6" width="0.127" layer="21"/>
+<wire x1="-13.4" y1="10.6" x2="13.4" y2="10.6" width="0.127" layer="21"/>
+<wire x1="13.4" y1="10.6" x2="13.4" y2="-1.7" width="0.127" layer="21"/>
+<wire x1="13.4" y1="-1.7" x2="13.4" y2="-4.4" width="0.127" layer="21"/>
+<wire x1="-13.3" y1="-1.7" x2="13.4" y2="-1.7" width="0.127" layer="21"/>
+</package>
+<package name="HEADER-2MM-3POS">
+<pad name="P$1" x="0" y="0" drill="0.8" diameter="1.4224"/>
+<pad name="P$2" x="2" y="0" drill="0.8" diameter="1.4224"/>
+<pad name="P$3" x="4" y="0" drill="0.8" diameter="1.4224"/>
+<wire x1="-1" y1="1" x2="5" y2="1" width="0.127" layer="21"/>
+<wire x1="5" y1="1" x2="5" y2="-1" width="0.127" layer="21"/>
+<wire x1="5" y1="-1" x2="-1" y2="-1" width="0.127" layer="21"/>
+<wire x1="-1" y1="-1" x2="-1" y2="1" width="0.127" layer="21"/>
+</package>
+<package name="AVX-9176-3POS">
+<smd name="1" x="0" y="0" dx="3" dy="5" layer="1"/>
+<smd name="2" x="4" y="0" dx="3" dy="5" layer="1"/>
+<smd name="3" x="8" y="0" dx="3" dy="5" layer="1"/>
+<wire x1="-1.5" y1="2.5" x2="-2" y2="2.5" width="0.127" layer="21"/>
+<wire x1="-2" y1="2.5" x2="-2" y2="-2.5" width="0.127" layer="21"/>
+<wire x1="-2" y1="-2.5" x2="-1.5" y2="-2.5" width="0.127" layer="21"/>
+<wire x1="9.5" y1="2.5" x2="10" y2="2.5" width="0.127" layer="21"/>
+<wire x1="10" y1="2.5" x2="10" y2="-2.5" width="0.127" layer="21"/>
+<wire x1="10" y1="-2.5" x2="9.5" y2="-2.5" width="0.127" layer="21"/>
+<wire x1="1.5" y1="2.5" x2="2.5" y2="2.5" width="0.127" layer="21"/>
+<wire x1="1.5" y1="-2.5" x2="2.5" y2="-2.5" width="0.127" layer="21"/>
+<wire x1="5.5" y1="2.5" x2="6.5" y2="2.5" width="0.127" layer="21"/>
+<wire x1="5.5" y1="-2.5" x2="6.5" y2="-2.5" width="0.127" layer="21"/>
 </package>
 </packages>
 <symbols>
@@ -2993,13 +3010,6 @@ PAD</text>
 <pin name="1" x="0" y="7.62" visible="off" length="short" direction="pas" swaplevel="1" rot="R270"/>
 <pin name="2" x="0" y="-7.62" visible="off" length="short" direction="pas" swaplevel="1" rot="R90"/>
 </symbol>
-<symbol name="PAD">
-<wire x1="0" y1="2.54" x2="7.62" y2="2.54" width="0.254" layer="94"/>
-<wire x1="7.62" y1="2.54" x2="7.62" y2="-2.54" width="0.254" layer="94"/>
-<pin name="PAD" x="-5.08" y="0" length="middle"/>
-<wire x1="7.62" y1="-2.54" x2="0" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="0" y1="-2.54" x2="0" y2="2.54" width="0.254" layer="94"/>
-</symbol>
 <symbol name="LOGO">
 <rectangle x1="6.2357" y1="-0.0127" x2="6.8199" y2="0.0127" layer="94"/>
 <rectangle x1="5.8547" y1="0.0127" x2="7.0993" y2="0.0381" layer="94"/>
@@ -3989,17 +3999,6 @@ PAD</text>
 <rectangle x1="6.1849" y1="13.0429" x2="6.8707" y2="13.0683" layer="94"/>
 <text x="-5.4864" y="-4.3942" size="2.54" layer="94" font="vector" ratio="16">BlueRobotics</text>
 </symbol>
-<symbol name="REGULATOR-3-PIN">
-<pin name="VIN" x="-12.7" y="5.08" visible="pin" length="middle"/>
-<pin name="VOUT" x="12.7" y="5.08" visible="pin" length="middle" rot="R180"/>
-<pin name="GND" x="0" y="-7.62" visible="pin" length="middle" rot="R90"/>
-<wire x1="-7.62" y1="-2.54" x2="-7.62" y2="7.62" width="0.254" layer="94"/>
-<wire x1="-7.62" y1="7.62" x2="7.62" y2="7.62" width="0.254" layer="94"/>
-<wire x1="7.62" y1="7.62" x2="7.62" y2="-2.54" width="0.254" layer="94"/>
-<wire x1="7.62" y1="-2.54" x2="-7.62" y2="-2.54" width="0.254" layer="94"/>
-<text x="-7.62" y="10.16" size="1.778" layer="95">&gt;NAME</text>
-<text x="-7.62" y="7.874" size="1.778" layer="95">&gt;VALUE</text>
-</symbol>
 <symbol name="SCHOTTKY">
 <wire x1="-1.27" y1="-1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
 <wire x1="1.27" y1="0" x2="-1.27" y2="1.27" width="0.254" layer="94"/>
@@ -4029,6 +4028,28 @@ PAD</text>
 <text x="-3.81" y="-3.302" size="1.778" layer="96">&gt;VALUE</text>
 <pin name="2" x="5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1" rot="R180"/>
 <pin name="1" x="-5.08" y="0" visible="off" length="short" direction="pas" swaplevel="1"/>
+</symbol>
+<symbol name="RT9068">
+<pin name="SHDN" x="-5.08" y="2.54" length="middle"/>
+<pin name="VIN" x="-5.08" y="7.62" length="middle"/>
+<pin name="VOUT" x="20.32" y="7.62" length="middle" rot="R180"/>
+<pin name="SENSE" x="20.32" y="5.08" length="middle" rot="R180"/>
+<pin name="GND" x="20.32" y="2.54" length="middle" rot="R180"/>
+<wire x1="0" y1="0" x2="15.24" y2="0" width="0.254" layer="94"/>
+<wire x1="15.24" y1="0" x2="15.24" y2="10.16" width="0.254" layer="94"/>
+<wire x1="15.24" y1="10.16" x2="0" y2="10.16" width="0.254" layer="94"/>
+<wire x1="0" y1="10.16" x2="0" y2="0" width="0.254" layer="94"/>
+<text x="0.254" y="10.414" size="1.778" layer="95">&gt;NAME</text>
+<text x="0.254" y="-2.286" size="1.778" layer="95">&gt;VALUE</text>
+</symbol>
+<symbol name="HEADER-3">
+<wire x1="0" y1="0" x2="0" y2="10.16" width="0.254" layer="94"/>
+<wire x1="0" y1="10.16" x2="7.62" y2="10.16" width="0.254" layer="94"/>
+<wire x1="7.62" y1="10.16" x2="7.62" y2="0" width="0.254" layer="94"/>
+<wire x1="7.62" y1="0" x2="0" y2="0" width="0.254" layer="94"/>
+<pin name="1" x="12.7" y="7.62" visible="pin" length="middle" rot="R180"/>
+<pin name="2" x="12.7" y="5.08" visible="pin" length="middle" rot="R180"/>
+<pin name="3" x="12.7" y="2.54" visible="pin" length="middle" rot="R180"/>
 </symbol>
 </symbols>
 <devicesets>
@@ -4102,53 +4123,6 @@ LETTER landscape</description>
 </device>
 </devices>
 </deviceset>
-<deviceset name="PAD">
-<gates>
-<gate name="G$1" symbol="PAD" x="0" y="0"/>
-</gates>
-<devices>
-<device name="2X3MM" package="PAD-2X3MM">
-<connects>
-<connect gate="G$1" pin="PAD" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="1.5X3MM" package="PAD-1.5X3MM">
-<connects>
-<connect gate="G$1" pin="PAD" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="PTH-MED" package="PAD-PTH-MED-1">
-<connects>
-<connect gate="G$1" pin="PAD" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="18AWG" package="PAD-PTH-18AWG-1">
-<connects>
-<connect gate="G$1" pin="PAD" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="4X6MM" package="PAD-4X6MM">
-<connects>
-<connect gate="G$1" pin="PAD" pad="P$1"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
 <deviceset name="LOGO">
 <gates>
 <gate name="G$1" symbol="LOGO" x="0" y="0"/>
@@ -4175,23 +4149,6 @@ LETTER landscape</description>
 </technologies>
 </device>
 <device name="BR-LOGO-MS-COPPER" package="BR-LOGO-MEDIUM-SMALL-COPPER">
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="VREG-ZXTR2105">
-<gates>
-<gate name="G$1" symbol="REGULATOR-3-PIN" x="0" y="-2.54"/>
-</gates>
-<devices>
-<device name="" package="SOT23-3">
-<connects>
-<connect gate="G$1" pin="GND" pad="1"/>
-<connect gate="G$1" pin="VIN" pad="3"/>
-<connect gate="G$1" pin="VOUT" pad="2"/>
-</connects>
 <technologies>
 <technology name=""/>
 </technologies>
@@ -4241,6 +4198,73 @@ LETTER landscape</description>
 <connects>
 <connect gate="G$1" pin="1" pad="1"/>
 <connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="VREG-RT9068">
+<description>RT9068 60V to 3.3V Regulator, 50mA</description>
+<gates>
+<gate name="G$1" symbol="RT9068" x="-7.62" y="-5.08"/>
+</gates>
+<devices>
+<device name="SOP-8" package="SOIC8N-LJ">
+<connects>
+<connect gate="G$1" pin="GND" pad="6 7 PAD"/>
+<connect gate="G$1" pin="SENSE" pad="2"/>
+<connect gate="G$1" pin="SHDN" pad="5"/>
+<connect gate="G$1" pin="VIN" pad="8"/>
+<connect gate="G$1" pin="VOUT" pad="1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="HEADER-3">
+<gates>
+<gate name="G$1" symbol="HEADER-3" x="-5.08" y="-5.08"/>
+</gates>
+<devices>
+<device name="ED3101" package="ED3101/3">
+<connects>
+<connect gate="G$1" pin="1" pad="1A 1B"/>
+<connect gate="G$1" pin="2" pad="2A 2B"/>
+<connect gate="G$1" pin="3" pad="3A 3B"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="BARRIER-BLOCK-1" package="OSTYK33103030">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+<connect gate="G$1" pin="3" pad="3"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="3MM" package="HEADER-2MM-3POS">
+<connects>
+<connect gate="G$1" pin="1" pad="P$1"/>
+<connect gate="G$1" pin="2" pad="P$2"/>
+<connect gate="G$1" pin="3" pad="P$3"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="AVX-9176" package="AVX-9176-3POS">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+<connect gate="G$1" pin="3" pad="3"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -11049,13 +11073,7 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="R3" library="resistor" deviceset="R-US_" device="R0603" value="10K"/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
-<part name="J1" library="SparkFun-Connectors" deviceset="AVR_SPI_PRG_6" device="PTH"/>
-<part name="U$4" library="BlueRobotics-Main" deviceset="PAD" device="2X3MM" value="PAD2X3MM"/>
-<part name="U$5" library="BlueRobotics-Main" deviceset="PAD" device="2X3MM" value="PAD2X3MM"/>
-<part name="U$6" library="BlueRobotics-Main" deviceset="PAD" device="2X3MM" value="PAD2X3MM"/>
-<part name="U$7" library="BlueRobotics-Main" deviceset="PAD" device="2X3MM" value="PAD2X3MM"/>
-<part name="U$8" library="BlueRobotics-Main" deviceset="PAD" device="2X3MM" value="PAD2X3MM"/>
-<part name="U$9" library="BlueRobotics-Main" deviceset="PAD" device="2X3MM" value="PAD2X3MM"/>
+<part name="J1" library="SparkFun-Connectors" deviceset="AVR_SPI_PRG_6" device="PTH" value="AVR_SPI"/>
 <part name="R4" library="resistor" deviceset="R-US_" device="R0603" value="3.3K 1%"/>
 <part name="R5" library="resistor" deviceset="R-US_" device="R0603" value="10K NTC"/>
 <part name="GND9" library="supply1" deviceset="GND" device=""/>
@@ -11068,8 +11086,6 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <part name="P+6" library="supply1" deviceset="VCC" device=""/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
 <part name="U$10" library="BlueRobotics-Main" deviceset="LOGO" device="BR-LOGO-MS-COPPER" value="LOGOBR-LOGO-MS-COPPER"/>
-<part name="U$11" library="BlueRobotics-Main" deviceset="VREG-ZXTR2105" device=""/>
-<part name="GND11" library="supply1" deviceset="GND" device=""/>
 <part name="C6" library="resistor" deviceset="C-EU" device="C0603" value="10uF"/>
 <part name="GND13" library="supply1" deviceset="GND" device=""/>
 <part name="SJ1" library="SparkFun-Passives" deviceset="JUMPER-PAD-2-NO" device=""/>
@@ -11081,6 +11097,11 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <part name="R6" library="BlueRobotics-Main" deviceset="RESISTOR" device="_0402" value="15K 1/5W"/>
 <part name="R8" library="BlueRobotics-Main" deviceset="RESISTOR" device="_0402" value="300K"/>
 <part name="Y1" library="SparkFun" deviceset="RESONATOR" device="SMD" value="8Mhz"/>
+<part name="U$13" library="BlueRobotics-Main" deviceset="VREG-RT9068" device="SOP-8" value="RT9068-3.3V"/>
+<part name="C9" library="resistor" deviceset="C-EU" device="C0805" value="0.18uF 50V"/>
+<part name="GND11" library="supply1" deviceset="GND" device=""/>
+<part name="U$11" library="BlueRobotics-Main" deviceset="HEADER-3" device="AVX-9176" value="009176003032006"/>
+<part name="U$12" library="BlueRobotics-Main" deviceset="HEADER-3" device="AVX-9176" value="009176003032006"/>
 </parts>
 <sheets>
 <sheet>
@@ -11114,12 +11135,6 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <instance part="R3" gate="G$1" x="96.52" y="60.96" rot="R180"/>
 <instance part="GND4" gate="1" x="40.64" y="53.34"/>
 <instance part="J1" gate="G$1" x="55.88" y="93.98"/>
-<instance part="U$4" gate="G$1" x="33.02" y="175.26"/>
-<instance part="U$5" gate="G$1" x="33.02" y="167.64"/>
-<instance part="U$6" gate="G$1" x="33.02" y="160.02"/>
-<instance part="U$7" gate="G$1" x="33.02" y="149.86"/>
-<instance part="U$8" gate="G$1" x="33.02" y="142.24"/>
-<instance part="U$9" gate="G$1" x="33.02" y="134.62"/>
 <instance part="R4" gate="G$1" x="165.1" y="73.66" rot="R90"/>
 <instance part="R5" gate="G$1" x="165.1" y="55.88" rot="R90"/>
 <instance part="GND9" gate="1" x="165.1" y="45.72"/>
@@ -11132,8 +11147,6 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <instance part="P+6" gate="VCC" x="27.94" y="76.2"/>
 <instance part="GND8" gate="1" x="132.08" y="53.34"/>
 <instance part="U$10" gate="G$1" x="226.06" y="33.02"/>
-<instance part="U$11" gate="G$1" x="63.5" y="25.4"/>
-<instance part="GND11" gate="1" x="63.5" y="12.7"/>
 <instance part="C6" gate="G$1" x="81.28" y="25.4"/>
 <instance part="GND13" gate="1" x="81.28" y="12.7"/>
 <instance part="SJ1" gate="G$1" x="22.86" y="121.92"/>
@@ -11145,6 +11158,11 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <instance part="R6" gate="G$1" x="88.9" y="81.534" rot="R90"/>
 <instance part="R8" gate="G$1" x="88.9" y="53.34" rot="R90"/>
 <instance part="Y1" gate="G$1" x="121.92" y="66.04" rot="R90"/>
+<instance part="U$13" gate="G$1" x="53.34" y="22.86"/>
+<instance part="C9" gate="G$1" x="27.94" y="25.4"/>
+<instance part="GND11" gate="1" x="27.94" y="12.7"/>
+<instance part="U$11" gate="G$1" x="40.64" y="172.72" rot="R180"/>
+<instance part="U$12" gate="G$1" x="40.64" y="147.32" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -11194,14 +11212,14 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <wire x1="68.58" y1="83.82" x2="68.58" y2="91.44" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="U$6" gate="G$1" pin="PAD"/>
-<wire x1="27.94" y1="160.02" x2="10.16" y2="160.02" width="0.1524" layer="91"/>
-<label x="10.16" y="160.02" size="1.778" layer="95"/>
+<wire x1="27.94" y1="165.1" x2="10.16" y2="165.1" width="0.1524" layer="91"/>
+<label x="10.16" y="165.1" size="1.778" layer="95"/>
+<pinref part="U$11" gate="G$1" pin="1"/>
 </segment>
 <segment>
-<pinref part="U$9" gate="G$1" pin="PAD"/>
-<wire x1="27.94" y1="134.62" x2="10.16" y2="134.62" width="0.1524" layer="91"/>
-<label x="10.16" y="134.62" size="1.778" layer="95"/>
+<wire x1="27.94" y1="139.7" x2="10.16" y2="139.7" width="0.1524" layer="91"/>
+<label x="10.16" y="139.7" size="1.778" layer="95"/>
+<pinref part="U$12" gate="G$1" pin="1"/>
 </segment>
 <segment>
 <pinref part="GND9" gate="1" pin="GND"/>
@@ -11220,14 +11238,15 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <pinref part="Y1" gate="G$1" pin="2"/>
 </segment>
 <segment>
-<pinref part="GND11" gate="1" pin="GND"/>
-<pinref part="U$11" gate="G$1" pin="GND"/>
-<wire x1="63.5" y1="15.24" x2="63.5" y2="17.78" width="0.1524" layer="91"/>
-</segment>
-<segment>
 <pinref part="GND13" gate="1" pin="GND"/>
 <pinref part="C6" gate="G$1" pin="2"/>
-<wire x1="81.28" y1="15.24" x2="81.28" y2="20.32" width="0.1524" layer="91"/>
+<wire x1="81.28" y1="15.24" x2="81.28" y2="17.78" width="0.1524" layer="91"/>
+<pinref part="U$13" gate="G$1" pin="GND"/>
+<wire x1="81.28" y1="17.78" x2="81.28" y2="20.32" width="0.1524" layer="91"/>
+<wire x1="73.66" y1="25.4" x2="76.2" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="76.2" y1="25.4" x2="76.2" y2="17.78" width="0.1524" layer="91"/>
+<wire x1="76.2" y1="17.78" x2="81.28" y2="17.78" width="0.1524" layer="91"/>
+<junction x="81.28" y="17.78"/>
 </segment>
 <segment>
 <pinref part="GND14" gate="1" pin="GND"/>
@@ -11238,6 +11257,17 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <pinref part="GND15" gate="1" pin="GND"/>
 <pinref part="R8" gate="G$1" pin="1"/>
 <wire x1="88.9" y1="48.26" x2="88.9" y2="45.72" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="U$13" gate="G$1" pin="SHDN"/>
+<wire x1="48.26" y1="25.4" x2="45.72" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="45.72" y1="25.4" x2="45.72" y2="17.78" width="0.1524" layer="91"/>
+<pinref part="GND11" gate="1" pin="GND"/>
+<wire x1="45.72" y1="17.78" x2="27.94" y2="17.78" width="0.1524" layer="91"/>
+<wire x1="27.94" y1="17.78" x2="27.94" y2="15.24" width="0.1524" layer="91"/>
+<pinref part="C9" gate="G$1" pin="2"/>
+<wire x1="27.94" y1="17.78" x2="27.94" y2="20.32" width="0.1524" layer="91"/>
+<junction x="27.94" y="17.78"/>
 </segment>
 </net>
 <net name="N$1" class="0">
@@ -11267,19 +11297,23 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <label x="48.26" y="154.94" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U$5" gate="G$1" pin="PAD"/>
 <wire x1="27.94" y1="167.64" x2="10.16" y2="167.64" width="0.1524" layer="91"/>
 <label x="10.16" y="167.64" size="1.778" layer="95"/>
+<pinref part="U$11" gate="G$1" pin="2"/>
 </segment>
 <segment>
-<pinref part="U$8" gate="G$1" pin="PAD"/>
 <wire x1="27.94" y1="142.24" x2="10.16" y2="142.24" width="0.1524" layer="91"/>
 <label x="10.16" y="142.24" size="1.778" layer="95"/>
+<pinref part="U$12" gate="G$1" pin="2"/>
 </segment>
 <segment>
-<pinref part="U$11" gate="G$1" pin="VIN"/>
-<wire x1="50.8" y1="30.48" x2="38.1" y2="30.48" width="0.1524" layer="91"/>
-<label x="38.1" y="30.48" size="1.778" layer="95"/>
+<wire x1="48.26" y1="30.48" x2="27.94" y2="30.48" width="0.1524" layer="91"/>
+<label x="20.32" y="30.48" size="1.778" layer="95"/>
+<pinref part="U$13" gate="G$1" pin="VIN"/>
+<pinref part="C9" gate="G$1" pin="1"/>
+<wire x1="27.94" y1="30.48" x2="20.32" y2="30.48" width="0.1524" layer="91"/>
+<wire x1="27.94" y1="27.94" x2="27.94" y2="30.48" width="0.1524" layer="91"/>
+<junction x="27.94" y="30.48"/>
 </segment>
 </net>
 <net name="LED-PWM" class="0">
@@ -11430,13 +11464,18 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <wire x1="27.94" y1="71.12" x2="27.94" y2="73.66" width="0.1524" layer="91"/>
 </segment>
 <segment>
-<pinref part="U$11" gate="G$1" pin="VOUT"/>
-<wire x1="76.2" y1="30.48" x2="81.28" y2="30.48" width="0.1524" layer="91"/>
+<wire x1="73.66" y1="30.48" x2="76.2" y2="30.48" width="0.1524" layer="91"/>
 <label x="83.82" y="30.48" size="1.778" layer="95"/>
 <pinref part="C6" gate="G$1" pin="1"/>
+<wire x1="76.2" y1="30.48" x2="81.28" y2="30.48" width="0.1524" layer="91"/>
 <wire x1="81.28" y1="30.48" x2="88.9" y2="30.48" width="0.1524" layer="91"/>
 <wire x1="81.28" y1="27.94" x2="81.28" y2="30.48" width="0.1524" layer="91"/>
 <junction x="81.28" y="30.48"/>
+<pinref part="U$13" gate="G$1" pin="VOUT"/>
+<pinref part="U$13" gate="G$1" pin="SENSE"/>
+<wire x1="73.66" y1="27.94" x2="76.2" y2="27.94" width="0.1524" layer="91"/>
+<wire x1="76.2" y1="27.94" x2="76.2" y2="30.48" width="0.1524" layer="91"/>
+<junction x="76.2" y="30.48"/>
 </segment>
 <segment>
 <pinref part="D2" gate="G$1" pin="C"/>
@@ -11520,14 +11559,14 @@ Small SMD resonator. This is the itty bitty 10/20MHz resonators with built in ca
 <pinref part="R6" gate="G$1" pin="2"/>
 </segment>
 <segment>
-<pinref part="U$7" gate="G$1" pin="PAD"/>
-<wire x1="27.94" y1="149.86" x2="10.16" y2="149.86" width="0.1524" layer="91"/>
-<label x="10.16" y="149.86" size="1.778" layer="95"/>
+<wire x1="27.94" y1="144.78" x2="10.16" y2="144.78" width="0.1524" layer="91"/>
+<label x="10.16" y="144.78" size="1.778" layer="95"/>
+<pinref part="U$12" gate="G$1" pin="3"/>
 </segment>
 <segment>
-<pinref part="U$4" gate="G$1" pin="PAD"/>
-<wire x1="27.94" y1="175.26" x2="10.16" y2="175.26" width="0.1524" layer="91"/>
-<label x="10.16" y="175.26" size="1.778" layer="95"/>
+<wire x1="27.94" y1="170.18" x2="10.16" y2="170.18" width="0.1524" layer="91"/>
+<label x="10.16" y="170.18" size="1.778" layer="95"/>
+<pinref part="U$11" gate="G$1" pin="3"/>
 </segment>
 </net>
 <net name="N$2" class="0">
