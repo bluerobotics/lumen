@@ -59,6 +59,10 @@ THE SOFTWARE.
 #define FILTER_DT       0.020f              // seconds
 #define FILTER_TAU      1.000f              // seconds
 
+// TIMER CHARACTERISTICS
+#define TIM0_PRESCALE   8                   // must match TCCR0B settings
+#define TIM1_PRESCALE   4                   // must match TCCR1 settings
+
 // HYSTERETIC ROUNDING
 #define HYST_FACTOR     0.8                 // 0.5: normal rounding
 
@@ -83,6 +87,11 @@ void initializePWMReader() {
 
   // Enable PCI for PWM input pin (PCINT0)
   bitSet(PCMSK, PCINT0);
+
+  // Set timer0 prescaler to 8 (millis() and micros() will run 8x fast)
+  bitClear(TCCR0B, CS02); // 0
+  bitSet  (TCCR0B, CS01); // 1
+  bitClear(TCCR0B, CS00); // 0
 }
 
 // Set registers for hardware PWM output
@@ -143,9 +152,9 @@ void setup() {
 
 void loop() {
   // Make sure we're still receiving PWM inputs
-  if ( (millis() - lastpulsetime)/1000.0f > INPUT_TIMEOUT ) {
+  if ( (adjustedMillis() - lastpulsetime)/1000.0f > INPUT_TIMEOUT ) {
     // Reset last pulse time to now to keep from running every loop
-    lastpulsetime = millis();
+    lastpulsetime = adjustedMillis();
 
     // If it has been too long since the last input, check input PWM state
     if ( digitalRead(SIGNAL_PIN) == HIGH ) {
@@ -158,9 +167,9 @@ void loop() {
   } // end pwm input check
 
   // Run filters at specified interval
-  if ( millis() > updatefilterruntime ) {
+  if ( adjustedMillis() > updatefilterruntime ) {
     // Set next filter runtime
-    updatefilterruntime = millis() + FILTER_DT*1000;
+    updatefilterruntime = adjustedMillis() + FILTER_DT*1000;
 
     // Declare local variables
     uint8_t rawbrightness;
@@ -224,16 +233,23 @@ SIGNAL(PCINT0_vect) {
   } else {
     // If this was a falling edge
     // Ignore inputs that cross a rollover
-    if ( inputpulsestart < micros() ) {
+    if ( inputpulsestart < adjustedMicros() ) {
       // Update pulse length
-      pulsein = micros() - inputpulsestart;
+      pulsein = adjustedMicros() - inputpulsestart;
     }
-    lastpulsetime = millis();
+    lastpulsetime = adjustedMillis();
   }
 }
 
+// Adjust for increased timer0 speed - microseconds
+uint32_t adjustedMicros() {
+  return micros()/(64/TIM0_PRESCALE);
 }
 
+// Adjust for increased timer0 speed - milliseconds
+uint32_t adjustedMillis() {
+  return millis()/(64/TIM0_PRESCALE);
+}
 
 ///////////////////////////
 // Round with Hysteresis //
