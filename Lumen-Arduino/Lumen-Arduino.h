@@ -41,8 +41,8 @@ THE SOFTWARE.
 #define NTC_T0          298.15f             // NTC ref. temp., Kelvin
 #define NTC_R0          10000.0f            // NTC resistance at ref. temp, ohms
 #define NTC_B           3350.0f             // NTC equation B parameter, Kelvin
-#define T_MAX           100.0f              // 100 C abs. max board temperature
-#define T_CONTROL       80.0f               // dimming start temp
+#define T_MAX           75.0f               // 80 C abs. max board temperature
+#define T_CONTROL       60.0f               // dimming start temp
 #define T_KP            (OUTPUT_MAX/(T_MAX-T_CONTROL))
 
 // OUTPUT LIMIT

@@ -40,10 +40,7 @@ class LPFilter
     float step(float input);
 
   private:
-    float _dt;                  // s
-    float _tau;                 // s
-
-    float _input;
+    float _alpha;
     float _output;
 };
 
