@@ -44,20 +44,19 @@ THE SOFTWARE.
 #define DIM_KI          0.5
 
 // OUTPUT LIMIT
-#define PWM_MIN         1                   // 0-255
-#define PWM_MAX         230                 // 0-255 - 230 for about 15W max
+#define OUTPUT_MIN      1                   // 0-255
+#define OUTPUT_MAX      230                 // 0-255 - 230 for about 15W max
 
 // SIGNAL CHARACTERISTICS
 #define PULSE_FREQ      50                  // Hz
 #define PULSE_PERIOD    1000000L/PULSE_FREQ // microseconds
-#define PULSE_CUTOFF    500                 // microseconds
 #define PULSE_MIN       1120                // microseconds
 #define PULSE_MAX       1880                // microseconds
 #define INPUT_TIMEOUT   0.050               // seconds
 
 // INPUT FILTER CHARACTERISTICS
-#define FILTER_DT       0.020f              // seconds
-#define FILTER_TAU      1.000f              // seconds
+#define FILTER_DT       0.010f              // seconds
+#define FILTER_TAU      0.200f              // seconds
 
 // TIMER CHARACTERISTICS
 #define TIM0_PRESCALE   8                   // must match TCCR0B settings
@@ -71,11 +70,9 @@ float   error;
 float   control;
 float   dimI;
 
-const float smoothAlpha = 0.02;
-
-uint32_t lastpulsetime        = 0;
-uint32_t updatefilterruntime  = 0;
-int16_t  pulsein              = PULSE_MIN;
+uint32_t lastpulsetime        = 0;          // ms
+uint32_t updatefilterruntime  = 0;          // ms
+volatile int16_t  pulsein     = 0;          // us
 LPFilter outputfilter;
 LPFilter tempfilter;
 
@@ -131,6 +128,15 @@ void setBrightness(uint8_t brightness) {
   OCR1A = brightness;
 }
 
+// Exponentially map input to output
+float expMap(float input, float imin, float imax, float omin, float omax) {
+  float a = omin;
+  float b = log(omax/omin)/(imax-imin);
+  float c = imin;
+
+  return a*exp(b*(input-c));
+}
+
 void setup() {
   // Set pins to correct modes
   pinMode(SIGNAL_PIN, INPUT );
@@ -162,7 +168,7 @@ void loop() {
       pulsein = PULSE_MAX;
     } else {
       // Otherwise turn off the LED (no pulse for a while)
-      pulsein = PULSE_MIN;
+      pulsein = 0;
     }
   } // end pwm input check
 
@@ -171,9 +177,6 @@ void loop() {
     // Set next filter runtime
     updatefilterruntime = adjustedMillis() + FILTER_DT*1000;
 
-    // Declare local variables
-    uint8_t rawbrightness;
-    uint8_t brightness;
     uint8_t maxpwm;
 
     // PID controller to control max temperature limit. Not a very linear
@@ -190,21 +193,26 @@ void loop() {
     // Apply control value to max PWM
     maxpwm = constrain(255 - control, PWM_MIN, PWM_MAX);
 
-    // Reject signals that are way off (i.e. const. 0 V, noise)
-    if ( pulsein >= PULSE_CUTOFF ) {
-      // Map valid PWM signals to [0.0 to PWM_MAX], clamp to [0, maxpwm]
-      rawbrightness = constrain(map(pulsein, PULSE_MIN, PULSE_MAX, 0, PWM_MAX), 0, maxpwm);
+    // Declare local variables
+    float   rawbrightness;
+    int16_t pulsewidth = pulsein;
+
+    // Reject signals that are too short (i.e. const. 0 V, noise)
+    if ( pulsewidth >= PULSE_MIN ) {
+      // Map valid PWM signals to [0.0 to OUTPUT_MAX], clamp to [0, maxpwm]
+      rawbrightness = constrain(expMap(pulsewidth, PULSE_MIN, PULSE_MAX,
+        OUTPUT_MIN, OUTPUT_MAX), 0, maxoutput);
     } else {
       // Turn off LED if invalid
       rawbrightness = 0;
     }
 
     // Filter velocity
-    brightness = hystereticRound(outputfilter.step(rawbrightness));
+    uint8_t brightness = hystereticRound(outputfilter.step(rawbrightness));
 
     // Set output PWM timers
-    if ( brightness >= PWM_MIN ) {
-      setBrightness(constrain(brightness, PWM_MIN, PWM_MAX));
+    if ( brightness >= OUTPUT_MIN ) {
+      setBrightness(constrain(brightness, OUTPUT_MIN, OUTPUT_MAX));
     } else {
       // Turn off LED
       setBrightness(0);
