@@ -36,12 +36,16 @@ THE SOFTWARE.
 #define LED_PIN         1
 #define TEMP_PIN        A1                  // A1
 
-// DIMMING CHARACTERISTICS
-// Temp to start dimming the lights at
-#define DIM_ADC         265                 // 265 for 85C board temperature
-// Dimming gains
-#define DIM_KP          5.0
-#define DIM_KI          0.5
+// TEMPERATURE LIMIT CHARACTERISTICS
+#define ADC_MAX         1023                // max value of ADC
+#define TEMP_SENSE_R    3300                // ohms
+#define CELSIUS_0       273.15f             // 0 deg. Celsius in Kelvin
+#define NTC_T0          298.15f             // NTC ref. temp., Kelvin
+#define NTC_R0          10000.0f            // NTC resistance at ref. temp, ohms
+#define NTC_B           3350.0f             // NTC equation B parameter, Kelvin
+#define T_MAX           100.0f              // 100 C abs. max board temperature
+#define T_CONTROL       80.0f               // dimming start temp
+#define T_KP            (OUTPUT_MAX/(T_MAX-T_CONTROL))
 
 // OUTPUT LIMIT
 #define OUTPUT_MIN      1                   // 0-255
@@ -65,16 +69,10 @@ THE SOFTWARE.
 // HYSTERETIC ROUNDING
 #define HYST_FACTOR     0.8                 // 0.5: normal rounding
 
-int16_t pwm;
-float   error;
-float   control;
-float   dimI;
-
 uint32_t lastpulsetime        = 0;          // ms
 uint32_t updatefilterruntime  = 0;          // ms
 volatile int16_t  pulsein     = 0;          // us
 LPFilter outputfilter;
-LPFilter tempfilter;
 
 
 // Set up pin change interrupt for PWM reader
@@ -137,6 +135,14 @@ float expMap(float input, float imin, float imax, float omin, float omax) {
   return a*exp(b*(input-c));
 }
 
+// Read temperature (Celsius)
+float getTemp(uint8_t pin) {
+  float adc = analogRead(pin);
+  float r   = (TEMP_SENSE_R*adc)/(ADC_MAX-adc);
+
+  return 1.0f/(1.0f/NTC_T0 + log(r/NTC_R0)/NTC_B) - CELSIUS_0;
+}
+
 void setup() {
   // Set pins to correct modes
   pinMode(SIGNAL_PIN, INPUT );
@@ -151,9 +157,6 @@ void setup() {
 
   // Initialize PWM output filter
   outputfilter = LPFilter(FILTER_DT, FILTER_TAU, 0);
-
-  // Initialize temperature output filter
-  tempfilter   = LPFilter(FILTER_DT, FILTER_TAU, 0);
 }
 
 void loop() {
@@ -177,21 +180,9 @@ void loop() {
     // Set next filter runtime
     updatefilterruntime = adjustedMillis() + FILTER_DT*1000;
 
-    uint8_t maxpwm;
-
-    // PID controller to control max temperature limit. Not a very linear
-    // approach but it works well for this. This will basically control the 
-    // limit to maintain DIM_ADC temperature or better.
-    error = DIM_ADC - tempfilter.step(analogRead(TEMP_PIN));
-
-    dimI += error*0.005;
-    dimI  = constrain(dimI, -255/abs(DIM_KI), 255/abs(DIM_KI)); // Limit I-term spooling
-
-    // Build control value
-    control = error*DIM_KP + dimI*DIM_KI;
-
-    // Apply control value to max PWM
-    maxpwm = constrain(255 - control, PWM_MIN, PWM_MAX);
+    // Calculate output limit to limit temperature
+    float maxoutput = constrain((T_MAX - getTemp(TEMP_PIN))*T_KP, OUTPUT_MIN,
+      OUTPUT_MAX);
 
     // Declare local variables
     float   rawbrightness;
@@ -216,9 +207,6 @@ void loop() {
     } else {
       // Turn off LED
       setBrightness(0);
-
-      // Reset I after turning LED off
-      dimI = 0;
     } // end set output PWM timers
   } // end run filters
 } // end loop()
