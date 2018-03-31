@@ -29,46 +29,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -------------------------------*/
 
+#include "Lumen-Arduino.h"
 #include "LPFilter.h"
 
-// HARDWARE PIN DEFINITIONS
-#define SIGNAL_PIN      0
-#define LED_PIN         1
-#define TEMP_PIN        A1                  // A1
-
-// TEMPERATURE LIMIT CHARACTERISTICS
-#define ADC_MAX         1023                // max value of ADC
-#define TEMP_SENSE_R    3300                // ohms
-#define CELSIUS_0       273.15f             // 0 deg. Celsius in Kelvin
-#define NTC_T0          298.15f             // NTC ref. temp., Kelvin
-#define NTC_R0          10000.0f            // NTC resistance at ref. temp, ohms
-#define NTC_B           3350.0f             // NTC equation B parameter, Kelvin
-#define T_MAX           100.0f              // 100 C abs. max board temperature
-#define T_CONTROL       80.0f               // dimming start temp
-#define T_KP            (OUTPUT_MAX/(T_MAX-T_CONTROL))
-
-// OUTPUT LIMIT
-#define OUTPUT_MIN      1                   // 0-255
-#define OUTPUT_MAX      230                 // 0-255 - 230 for about 15W max
-
-// SIGNAL CHARACTERISTICS
-#define PULSE_FREQ      50                  // Hz
-#define PULSE_PERIOD    1000000L/PULSE_FREQ // microseconds
-#define PULSE_MIN       1120                // microseconds
-#define PULSE_MAX       1880                // microseconds
-#define INPUT_TIMEOUT   0.050               // seconds
-
-// INPUT FILTER CHARACTERISTICS
-#define FILTER_DT       0.010f              // seconds
-#define FILTER_TAU      0.200f              // seconds
-
-// TIMER CHARACTERISTICS
-#define TIM0_PRESCALE   8                   // must match TCCR0B settings
-#define TIM1_PRESCALE   4                   // must match TCCR1 settings
-
-// HYSTERETIC ROUNDING
-#define HYST_FACTOR     0.8                 // 0.5: normal rounding
-
+// GLOBAL VARIABLES
 uint32_t lastpulsetime        = 0;          // ms
 uint32_t updatefilterruntime  = 0;          // ms
 volatile int16_t  pulsein     = 0;          // us
