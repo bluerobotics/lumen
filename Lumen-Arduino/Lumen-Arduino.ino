@@ -29,12 +29,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -------------------------------*/
 
+#include <util/atomic.h>
 #include "Lumen-Arduino.h"
 #include "LPFilter.h"
 
 // GLOBAL VARIABLES
-uint32_t lastpulsetime        = 0;          // ms
 uint32_t updatefilterruntime  = 0;          // ms
+volatile uint32_t pulsetime   = 0;          // ms
 volatile int16_t  pulsein     = 0;          // us
 LPFilter outputfilter;
 
@@ -67,10 +68,22 @@ void setup() {
 //////////
 
 void loop() {
+  // Declare local variables for holding large volatile variables
+  uint32_t lastpulsetime;
+  int16_t  lastpulsein;
+
+  // Copy 16-bit and larger volatile variables to local variables
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    lastpulsetime = pulsetime;
+    lastpulsein   = pulsein;
+  }
+
   // Make sure we're still receiving PWM inputs
   if ( (adjustedMillis() - lastpulsetime)/1000.0f > INPUT_TIMEOUT ) {
     // Reset last pulse time to now to keep from running every loop
-    lastpulsetime = adjustedMillis();
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+      pulsetime = adjustedMillis();
+    }
 
     // If it has been too long since the last input, check input PWM state
     if ( digitalRead(SIGNAL_PIN) == HIGH ) {
@@ -93,10 +106,9 @@ void loop() {
 
     // Declare local variables
     float   rawbrightness;
-    int16_t pulsewidth = pulsein;
 
     // Reject signals that are too short (i.e. const. 0 V, noise)
-    if ( pulsewidth >= PULSE_MIN ) {
+    if ( lastpulsein >= PULSE_MIN ) {
       // Map valid PWM signals to [0.0 to OUTPUT_MAX], clamp to [0, maxpwm]
       rawbrightness = constrain(expMap(pulsewidth, PULSE_MIN, PULSE_MAX,
         OUTPUT_MIN, OUTPUT_MAX), 0, maxoutput);
@@ -183,6 +195,9 @@ uint32_t inputpulsestart   = 0xFFFF;
  * Sets pin change interrupt and timer0 prescaler registers for PWM reader
  ******************************************************************************/
 void initializePWMReader() {
+  // Enable pin change interrupts
+  bitSet(GIMSK, PCIE);
+
   // Enable PCI for PWM input pin (PCINT0)
   bitSet(PCMSK, PCINT0);
 
@@ -193,6 +208,9 @@ void initializePWMReader() {
   bitClear(TCCR0B, CS02); // 0
   bitSet  (TCCR0B, CS01); // 1
   bitClear(TCCR0B, CS00); // 0
+
+  // Done setting timers -> allow interrupts again
+  sei();
 }
 
 /******************************************************************************
@@ -212,7 +230,7 @@ SIGNAL(PCINT0_vect) {
       // Update pulse length
       pulsein = adjustedMicros() - inputpulsestart;
     }
-    lastpulsetime = adjustedMillis();
+    pulsetime = adjustedMillis();
   }
 }
 
