@@ -41,10 +41,7 @@ LPFilter::LPFilter() {}
 // Constructor
 LPFilter::LPFilter(float dt, float tau, float prefill)
 {
-  _dt   = dt;
-  _tau  = tau;
-
-  _input  = prefill;
+  _alpha  = dt/tau;
   _output = prefill;
 }
 
@@ -59,22 +56,8 @@ LPFilter::~LPFilter() {} // Nothing to destruct
 // Move filter along one timestep, return filtered output
 float LPFilter::step(float input)
 {
-  // Update input
-  _input = input;
+  // Update output
+  _output = _alpha*input - (_alpha - 1)*_output;
 
-  // Initialize output value
-  float output = 0;
-
-  // Run filter
-  // Handle input
-  output += _dt/_tau*_input;
-
-  // Handle output
-  output -= (_dt/_tau - 1)*_output;
-
-  // Save latest output
-  _output = output;
-
-  return output;
+  return _output;
 }
-

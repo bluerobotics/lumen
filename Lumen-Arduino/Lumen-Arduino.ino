@@ -39,73 +39,11 @@ volatile int16_t  pulsein     = 0;          // us
 LPFilter outputfilter;
 
 
-// Set up pin change interrupt for PWM reader
-void initializePWMReader() {
-  // Enable pin change interrupts
-  bitSet(GIMSK, PCIE);
+/*----------------------------------------------------------------------------*/
 
-  // Enable PCI for PWM input pin (PCINT0)
-  bitSet(PCMSK, PCINT0);
-
-  // Set timer0 prescaler to 8 (millis() and micros() will run 8x fast)
-  bitClear(TCCR0B, CS02); // 0
-  bitSet  (TCCR0B, CS01); // 1
-  bitClear(TCCR0B, CS00); // 0
-}
-
-// Set registers for hardware PWM output
-void initializePWMOutput() {
-  // Stop interrupts while changing timer settings
-  cli();
-
-  // Use 0xFF (255) as top
-  bitClear(TCCR1, CTC1);
-
-  // Enable PWM A
-  bitSet  (TCCR1, PWM1A);
-
-  // Set timer1 clock source to prescaler 4 (8M/4/256 = 7812.5 Hz)
-  bitSet  (TCCR1, CS10);
-  bitSet  (TCCR1, CS11);
-  bitClear(TCCR1, CS12);
-  bitClear(TCCR1, CS13);
-
-  // Set non-inverting PWM mode, disable !OC1A (pin 0)
-  bitClear(TCCR1, COM1A0);
-  bitSet  (TCCR1, COM1A1);
-
-  // Disable OC1B and !OC1B (pins 3 & 4)
-  bitClear(GTCCR, COM1B0);
-  bitClear(GTCCR, COM1B1);
-
-  // Initialize to off
-  setBrightness(0);
-
-  // Done setting timers -> allow interrupts again
-  sei();
-}
-
-// Set brightness of LED
-void setBrightness(uint8_t brightness) {
-  OCR1A = brightness;
-}
-
-// Exponentially map input to output
-float expMap(float input, float imin, float imax, float omin, float omax) {
-  float a = omin;
-  float b = log(omax/omin)/(imax-imin);
-  float c = imin;
-
-  return a*exp(b*(input-c));
-}
-
-// Read temperature (Celsius)
-float getTemp(uint8_t pin) {
-  float adc = analogRead(pin);
-  float r   = (TEMP_SENSE_R*adc)/(ADC_MAX-adc);
-
-  return 1.0f/(1.0f/NTC_T0 + log(r/NTC_R0)/NTC_B) - CELSIUS_0;
-}
+///////////
+// SETUP //
+///////////
 
 void setup() {
   // Set pins to correct modes
@@ -122,6 +60,11 @@ void setup() {
   // Initialize PWM output filter
   outputfilter = LPFilter(FILTER_DT, FILTER_TAU, 0);
 }
+
+
+//////////
+// LOOP //
+//////////
 
 void loop() {
   // Make sure we're still receiving PWM inputs
@@ -175,16 +118,88 @@ void loop() {
   } // end run filters
 } // end loop()
 
+
+/*----------------------------------------------------------------------------*/
+
+//////////////////////////
+// PWM Output Functions //
+//////////////////////////
+
+/******************************************************************************
+ * void initializePWMOutput()
+ *
+ * Sets timer1 registers for hardware PWM output
+ ******************************************************************************/
+void initializePWMOutput() {
+  // Stop interrupts while changing timer settings
+  cli();
+
+  // Use 0xFF (255) as top
+  bitClear(TCCR1, CTC1);
+
+  // Enable PWM A
+  bitSet  (TCCR1, PWM1A);
+
+  // Set timer1 clock source to prescaler 4 (8M/4/256 = 7812.5 Hz)
+  bitClear(TCCR1, CS13); // 0
+  bitClear(TCCR1, CS12); // 0
+  bitSet  (TCCR1, CS11); // 1
+  bitSet  (TCCR1, CS10); // 1
+
+  // Set non-inverting PWM mode, disable !OC1A (pin 0)
+  bitClear(TCCR1, COM1A0);
+  bitSet  (TCCR1, COM1A1);
+
+  // Disable OC1B and !OC1B (pins 3 & 4)
+  bitClear(GTCCR, COM1B0);
+  bitClear(GTCCR, COM1B1);
+
+  // Initialize to off
+  setBrightness(0);
+
+  // Done setting timers -> allow interrupts again
+  sei();
+}
+
+/******************************************************************************
+ * void setBrightness(uint8_t brightness)
+ *
+ * Sets the duty cycle (brightness) for the output pin (LED)
+ ******************************************************************************/
+void setBrightness(uint8_t brightness) {
+  OCR1A = brightness;
+}
+
 ///////////////////////////
 // Input Timer Functions //
 ///////////////////////////
 
 // Define global variables only used for input timer
-namespace {
-  uint32_t inputpulsestart   = 0xFFFF;
+uint32_t inputpulsestart   = 0xFFFF;
+
+/******************************************************************************
+ * void initializePWMReader()
+ *
+ * Sets pin change interrupt and timer0 prescaler registers for PWM reader
+ ******************************************************************************/
+void initializePWMReader() {
+  // Enable PCI for PWM input pin (PCINT0)
+  bitSet(PCMSK, PCINT0);
+
+  // Stop interrupts while changing timer settings
+  cli();
+
+  // Set timer0 prescaler to 8 (millis() and micros() will run 8x fast)
+  bitClear(TCCR0B, CS02); // 0
+  bitSet  (TCCR0B, CS01); // 1
+  bitClear(TCCR0B, CS00); // 0
 }
 
-// Read PWM input
+/******************************************************************************
+ * SIGNAL(PCINT0_vect)
+ *
+ * Pin change interrupt which measures the length of input PWM signals
+ ******************************************************************************/
 SIGNAL(PCINT0_vect) {
   if ( digitalRead(SIGNAL_PIN) ) {
     // If this was a rising edge
@@ -201,12 +216,22 @@ SIGNAL(PCINT0_vect) {
   }
 }
 
-// Adjust for increased timer0 speed - microseconds
+/******************************************************************************
+ * uint32_t adjustedMicros()
+ *
+ * Returns the time since this program started in microseconds, corrected for
+ * increased timer0 speed
+ ******************************************************************************/
 uint32_t adjustedMicros() {
   return micros()/(64/TIM0_PRESCALE);
 }
 
-// Adjust for increased timer0 speed - milliseconds
+/******************************************************************************
+ * uint32_t adjustedMillis()
+ *
+ * Returns the time since this program started in milliseconds, corrected for
+ * increased timer0 speed
+ ******************************************************************************/
 uint32_t adjustedMillis() {
   return millis()/(64/TIM0_PRESCALE);
 }
@@ -214,11 +239,48 @@ uint32_t adjustedMillis() {
 ///////////////////////////
 // Round with Hysteresis //
 ///////////////////////////
+
+// Define global variables only used for hysteretic rounding
 float oldvalue = 0.0f;
 
+/******************************************************************************
+ * int hystereticRound(float newvalue)
+ *
+ * Changes value only if the difference between oldvalue and newvalue is greater
+ * than HYST_FACTOR.
+ ******************************************************************************/
 int hystereticRound(float newvalue) {
   if ( abs(oldvalue - newvalue) > HYST_FACTOR ) {
     oldvalue = round(newvalue);
   }
   return (int) oldvalue;
+}
+
+/////////////////////////////
+// Miscellaneous Functions //
+/////////////////////////////
+
+/******************************************************************************
+ * float expMap(float input, float imin, float imax, float omin, float omax)
+ *
+ * Maps input from [imin, imax] to [omin, omax] exponentially
+ ******************************************************************************/
+float expMap(float input, float imin, float imax, float omin, float omax) {
+  float a = omin;
+  float b = log(omax/omin)/(imax-imin);
+  float c = imin;
+
+  return a*exp(b*(input-c));
+}
+
+/******************************************************************************
+ * float getTemp(uint8_t pin)
+ *
+ * Returns the temperature of an NTC thermistor on given ADC input
+ ******************************************************************************/
+float getTemp(uint8_t pin) {
+  float adc = analogRead(pin);
+  float r   = (TEMP_SENSE_R*adc)/(ADC_MAX-adc);
+
+  return 1.0f/(1.0f/NTC_T0 + log(r/NTC_R0)/NTC_B) - CELSIUS_0;
 }
