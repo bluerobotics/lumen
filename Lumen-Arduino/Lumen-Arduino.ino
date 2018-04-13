@@ -35,7 +35,7 @@ THE SOFTWARE.
 #include "HystRound.h"
 
 // GLOBAL VARIABLES
-uint32_t updatefilterruntime  = 0;          // ms
+uint32_t lastfilterruntime    = 0;          // ms
 volatile uint32_t pulsetime   = 0;          // ms
 volatile int16_t  pulsein     = 0;          // us
 
@@ -101,9 +101,9 @@ void loop() {
   } // end pwm input check
 
   // Run filters at specified interval
-  if ( adjustedMillis() > updatefilterruntime ) {
+  if ( (adjustedMillis() - lastfilterruntime)/1000.0f > FILTER_DT) {
     // Set next filter runtime
-    updatefilterruntime = adjustedMillis() + FILTER_DT*1000;
+    lastfilterruntime = adjustedMillis();
 
     // Calculate output limit to limit temperature
     int maxinput = constrain((T_MAX - getTemp(TEMP_PIN))*T_KP, 0, N_STEPS-1);
