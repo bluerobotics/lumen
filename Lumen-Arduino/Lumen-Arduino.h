@@ -43,7 +43,7 @@ THE SOFTWARE.
 #define NTC_B           3350.0f             // NTC equation B parameter, Kelvin
 #define T_MAX           75.0f               // 80 C abs. max board temperature
 #define T_CONTROL       60.0f               // dimming start temp
-#define T_KP            (OUTPUT_MAX/(T_MAX-T_CONTROL))
+#define T_KP            ((N_STEPS-1)/(T_MAX-T_CONTROL))
 
 // OUTPUT LIMIT
 #define OUTPUT_MIN      1                   // 0-255
@@ -52,13 +52,22 @@ THE SOFTWARE.
 // SIGNAL CHARACTERISTICS
 #define PULSE_FREQ      50                  // Hz
 #define PULSE_PERIOD    1000000L/PULSE_FREQ // microseconds
+#define PULSE_CUTOFF    500                 // microseconds
 #define PULSE_MIN       1120                // microseconds
 #define PULSE_MAX       1880                // microseconds
 #define INPUT_TIMEOUT   0.050               // seconds
 
 // INPUT FILTER CHARACTERISTICS
 #define FILTER_DT       0.010f              // seconds
-#define FILTER_TAU      0.200f              // seconds
+#define FILTER_TAU      0.100f              // seconds
+#define N_STEPS         64                  // # of discrete outputs
+
+// EXPONENTIAL MAP PARAMETERS
+#define EXP_MAP_A0      0.399f              // "exponential" map const term
+#define EXP_MAP_A1      0.0755f             // "exponential" map linear term
+#define EXP_MAP_A2      0.00699f            // "exponential" map quadratic term
+#define EXP_MAP_A3      0.000324f           // "exponential" map cubic term
+#define EXP_MAP_A4      0.00000734f         // "exponential" map quartic term
 
 // TIMER CHARACTERISTICS
 #define TIM0_PRESCALE   8                   // must match TCCR0B settings

@@ -32,13 +32,15 @@ THE SOFTWARE.
 #include <util/atomic.h>
 #include "Lumen-Arduino.h"
 #include "LPFilter.h"
+#include "HystRound.h"
 
 // GLOBAL VARIABLES
 uint32_t updatefilterruntime  = 0;          // ms
 volatile uint32_t pulsetime   = 0;          // ms
 volatile int16_t  pulsein     = 0;          // us
-LPFilter outputfilter;
 
+LPFilter   inputfilter;
+HystRound  inputhysteretic;
 
 /*----------------------------------------------------------------------------*/
 
@@ -58,8 +60,11 @@ void setup() {
   // Initialize hardware timer1 for PWM output
   initializePWMOutput();
 
-  // Initialize PWM output filter
-  outputfilter = LPFilter(FILTER_DT, FILTER_TAU, 0);
+  // Initialize PWM input filter
+  inputfilter = LPFilter(FILTER_DT, FILTER_TAU, 0);
+
+  // Initialize input hysteresis rounder
+  inputhysteretic = HystRound(0, HYST_FACTOR);
 }
 
 
@@ -101,32 +106,29 @@ void loop() {
     updatefilterruntime = adjustedMillis() + FILTER_DT*1000;
 
     // Calculate output limit to limit temperature
-    float maxoutput = constrain((T_MAX - getTemp(TEMP_PIN))*T_KP, OUTPUT_MIN,
-      OUTPUT_MAX);
+    int maxinput = constrain((T_MAX - getTemp(TEMP_PIN))*T_KP, 0, N_STEPS-1);
 
     // Declare local variables
-    float   rawbrightness;
+    float rawinput;
 
     // Reject signals that are too short (i.e. const. 0 V, noise)
-    if ( lastpulsein >= PULSE_MIN ) {
-      // Map valid PWM signals to [0.0 to OUTPUT_MAX], clamp to [0, maxpwm]
-      rawbrightness = constrain(expMap(pulsewidth, PULSE_MIN, PULSE_MAX,
-        OUTPUT_MIN, OUTPUT_MAX), 0, maxoutput);
+    if ( lastpulsein >= PULSE_CUTOFF ) {
+      // Discretize valid PWM signals to [0, maxinput]
+      rawinput = constrain((float)(lastpulsein - PULSE_MIN)*(N_STEPS-1)
+        /(PULSE_MAX -PULSE_MIN), 0, maxinput);
     } else {
-      // Turn off LED if invalid
-      rawbrightness = 0;
+      // Set input to 0 (off) if invalid
+      rawinput = 0;
     }
 
-    // Filter velocity
-    uint8_t brightness = hystereticRound(outputfilter.step(rawbrightness));
+    // Filter and apply hysteretic rounding to input
+    uint8_t input = inputhysteretic.hystRound(inputfilter.step(rawinput));
+
+    // Map input to brightness
+    uint8_t brightness = expMap(input);
 
     // Set output PWM timers
-    if ( brightness >= OUTPUT_MIN ) {
-      setBrightness(constrain(brightness, OUTPUT_MIN, OUTPUT_MAX));
-    } else {
-      // Turn off LED
-      setBrightness(0);
-    } // end set output PWM timers
+    setBrightness(constrain(brightness, 0, OUTPUT_MAX));
   } // end run filters
 } // end loop()
 
@@ -254,41 +256,18 @@ uint32_t adjustedMillis() {
   return millis()/(64/TIM0_PRESCALE);
 }
 
-///////////////////////////
-// Round with Hysteresis //
-///////////////////////////
-
-// Define global variables only used for hysteretic rounding
-float oldvalue = 0.0f;
-
-/******************************************************************************
- * int hystereticRound(float newvalue)
- *
- * Changes value only if the difference between oldvalue and newvalue is greater
- * than HYST_FACTOR.
- ******************************************************************************/
-int hystereticRound(float newvalue) {
-  if ( abs(oldvalue - newvalue) > HYST_FACTOR ) {
-    oldvalue = round(newvalue);
-  }
-  return (int) oldvalue;
-}
-
 /////////////////////////////
 // Miscellaneous Functions //
 /////////////////////////////
 
 /******************************************************************************
- * float expMap(float input, float imin, float imax, float omin, float omax)
+ * uint8_t expMap(float x)
  *
- * Maps input from [imin, imax] to [omin, omax] exponentially
+ * Maps input from [0, N_STEPS-1] to [0, OUTPUT_MAX] pseudo-exponentially
  ******************************************************************************/
-float expMap(float input, float imin, float imax, float omin, float omax) {
-  float a = omin;
-  float b = log(omax/omin)/(imax-imin);
-  float c = imin;
-
-  return a*exp(b*(input-c));
+uint8_t expMap(float x) {
+  return round(EXP_MAP_A0 + EXP_MAP_A1*x + EXP_MAP_A2*x*x + EXP_MAP_A3*x*x*x
+    + EXP_MAP_A4*x*x*x*x);
 }
 
 /******************************************************************************
