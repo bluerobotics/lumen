@@ -125,7 +125,7 @@ void loop() {
     uint8_t input = inputhysteretic.hystRound(inputfilter.step(rawinput));
 
     // Map input to brightness
-    uint8_t brightness = expMap(input);
+    uint8_t brightness = OUTPUT_MAX*expMap((float) input/(N_STEPS-1));
 
     // Set output PWM timers
     setBrightness(constrain(brightness, 0, OUTPUT_MAX));
@@ -261,13 +261,13 @@ uint32_t adjustedMillis() {
 /////////////////////////////
 
 /******************************************************************************
- * uint8_t expMap(float x)
+ * float expMap(float x)
  *
- * Maps input from [0, N_STEPS-1] to [0, OUTPUT_MAX] pseudo-exponentially
+ * Maps input from [0, 1] to [0, 1] pseudo-exponentially
  ******************************************************************************/
-uint8_t expMap(float x) {
-  return round(EXP_MAP_A0 + EXP_MAP_A1*x + EXP_MAP_A2*x*x + EXP_MAP_A3*x*x*x
-    + EXP_MAP_A4*x*x*x*x);
+float expMap(float x) {
+  return EXP_MAP_A0 + EXP_MAP_A1*x + EXP_MAP_A2*x*x + EXP_MAP_A3*x*x*x
+    + EXP_MAP_A4*x*x*x*x;
 }
 
 /******************************************************************************
