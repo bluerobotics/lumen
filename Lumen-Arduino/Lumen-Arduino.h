@@ -46,7 +46,6 @@ THE SOFTWARE.
 #define T_KP            ((N_STEPS-1)/(T_MAX-T_CONTROL))
 
 // OUTPUT LIMIT
-#define OUTPUT_MIN      1                   // 0-255
 #define OUTPUT_MAX      230                 // 0-255 - 230 for about 15W max
 
 // SIGNAL CHARACTERISTICS
@@ -63,11 +62,11 @@ THE SOFTWARE.
 #define N_STEPS         64                  // # of discrete outputs
 
 // EXPONENTIAL MAP PARAMETERS
-#define EXP_MAP_A0      0.399f              // "exponential" map const term
-#define EXP_MAP_A1      0.0755f             // "exponential" map linear term
-#define EXP_MAP_A2      0.00699f            // "exponential" map quadratic term
-#define EXP_MAP_A3      0.000324f           // "exponential" map cubic term
-#define EXP_MAP_A4      0.00000734f         // "exponential" map quartic term
+#define EXP_MAP_A0      0.00173f            // "exponential" map const term
+#define EXP_MAP_A1      0.0345f             // "exponential" map linear term
+#define EXP_MAP_A2      0.217f              // "exponential" map quadratic term
+#define EXP_MAP_A3      0.451f              // "exponential" map cubic term
+#define EXP_MAP_A4      0.297f              // "exponential" map quartic term
 
 // TIMER CHARACTERISTICS
 #define TIM0_PRESCALE   8                   // must match TCCR0B settings
