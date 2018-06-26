@@ -59,7 +59,7 @@ THE SOFTWARE.
 // INPUT FILTER CHARACTERISTICS
 #define FILTER_DT       0.010f              // seconds
 #define FILTER_TAU      0.100f              // seconds
-#define N_STEPS         64                  // # of discrete outputs
+#define N_STEPS         128                 // # of discrete outputs
 
 // EXPONENTIAL MAP PARAMETERS
 #define EXP_MAP_A0      0.00173f            // "exponential" map const term
