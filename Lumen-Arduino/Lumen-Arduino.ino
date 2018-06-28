@@ -194,6 +194,8 @@ void setBrightness(uint8_t brightness) {
 
 // Define global variables only used for input timer
 uint32_t inputpulsestart   = 0xFFFF;
+uint32_t inputpulseend     = 0x0000;
+bool     pulsecheckenabled = false;
 
 /******************************************************************************
  * void initializePWMReader()
@@ -220,6 +222,38 @@ void initializePWMReader() {
 }
 
 /******************************************************************************
+ * void disablePulseCheck()
+ *
+ * Disable pulse end check interrupt
+ ******************************************************************************/
+void disablePulseCheck() {
+  // Disable timer0 interrupt for pulse end check
+  bitClear(TIMSK, OCIE0A);
+
+  // Set "enabled" flag
+  pulsecheckenabled = false;
+}
+
+/******************************************************************************
+ * void schedulePulseCheck(int delaytime)
+ *
+ * Schedule pulse end check interrupt
+ ******************************************************************************/
+void schedulePulseCheck(int delaytime) {
+  // Calculate number of counts for delaytime (us)
+  int counts = delaytime/TIM0_US_PER_CNT;
+
+  // Set OCR0A to schedule pulse end check
+  OCR0A = (TCNT0 + counts) % 256;
+
+  // Enable timer0 interrupt for pulse end check
+  bitSet(TIMSK, OCIE0A);
+
+  // Set "enabled" flag
+  pulsecheckenabled = true;
+}
+
+/******************************************************************************
  * SIGNAL(PCINT0_vect)
  *
  * Pin change interrupt which measures the length of input PWM signals
@@ -227,17 +261,39 @@ void initializePWMReader() {
 SIGNAL(PCINT0_vect) {
   if ( digitalRead(SIGNAL_PIN) ) {
     // If this was a rising edge
-    // Save the start time
-    inputpulsestart = adjustedMicros();
+    if ( !pulsecheckenabled ) {
+      // Save the start time
+      inputpulsestart = adjustedMicros();
+    } else {
+      // Disable pulse check
+      disablePulseCheck();
+    }
   } else {
     // If this was a falling edge
-    // Ignore inputs that cross a rollover
-    if ( inputpulsestart < adjustedMicros() ) {
-      // Update pulse length
-      pulsein = adjustedMicros() - inputpulsestart;
-    }
-    pulsetime = adjustedMillis();
+    // Record end of input pulse (provisional)
+    inputpulseend = adjustedMicros();
+
+    // Schedule a time to check whether the pulse has actually ended
+    schedulePulseCheck(PULSE_CHK_DELAY);
   }
+}
+
+/******************************************************************************
+ * SIGNAL(TIM0_COMPA_vect)
+ *
+ * This function is needed as a consequence of the PixHawk having 3.3V
+ * PWM logic as well as noise that gets into the signal from motors.
+ * It checks a little after a falling edge whether the signal pulse has
+ * ended and to update pulsein
+ ******************************************************************************/
+SIGNAL(TIM0_COMPA_vect) {
+  // Only use data for which the start time comes first (ignore rollovers)
+  if ( inputpulsestart < inputpulseend ) {
+    // Update pulse length
+    pulsein = inputpulseend - inputpulsestart;
+  }
+  pulsetime = adjustedMillis();
+  disablePulseCheck();
 }
 
 /******************************************************************************

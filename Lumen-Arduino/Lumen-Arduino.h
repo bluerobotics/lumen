@@ -72,5 +72,9 @@ THE SOFTWARE.
 #define TIM0_PRESCALE   8                   // must match TCCR0B settings
 #define TIM1_PRESCALE   4                   // must match TCCR1 settings
 
+// PULSE CHECK CHARACTERISTICS
+#define PULSE_CHK_DELAY 20                  // microseconds
+#define TIM0_US_PER_CNT (TIM0_PRESCALE/clockCyclesPerMicrosecond())
+
 // HYSTERETIC ROUNDING
 #define HYST_FACTOR     0.8                 // 0.5: normal rounding
