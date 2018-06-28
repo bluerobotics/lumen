@@ -41,6 +41,7 @@ volatile int16_t  pulsein     = 0;          // us
 
 LPFilter   inputfilter;
 HystRound  inputhysteretic;
+HystRound  temphysteretic;
 
 /*----------------------------------------------------------------------------*/
 
@@ -65,6 +66,9 @@ void setup() {
 
   // Initialize input hysteresis rounder
   inputhysteretic = HystRound(0, HYST_FACTOR);
+
+  // Initialize temperature hysteresis rounder
+  temphysteretic = HystRound(0, 8.0f);
 }
 
 
@@ -106,7 +110,7 @@ void loop() {
     lastfilterruntime = adjustedMillis();
 
     // Calculate output limit to limit temperature
-    int maxinput = constrain((T_MAX - getTemp(TEMP_PIN))*T_KP, 0, N_STEPS-1);
+    int maxinput = constrain(temphysteretic.hystRound((T_MAX - getTemp(TEMP_PIN))*T_KP), 0, N_STEPS-1);
 
     // Declare local variables
     float rawinput;
