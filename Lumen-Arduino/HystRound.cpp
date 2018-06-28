@@ -56,8 +56,10 @@ HystRound::~HystRound() {} // Nothing to destruct
 // Move filter along one timestep, return filtered output
 int16_t HystRound::hystRound(float newvalue)
 {
-  if ( abs((float)_value - newvalue) > _hystfactor ) {
-    _value = round(newvalue);
+  if ( ((float)_value - newvalue) > _hystfactor ) {
+    _value = round(newvalue + _hystfactor);
+  } else if ( (newvalue - (float)_value) > _hystfactor ) {
+    _value = round(newvalue - _hystfactor);
   }
   return _value;
 }
