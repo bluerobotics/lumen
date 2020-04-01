@@ -1,6 +1,6 @@
 /* Blue Robotics Lumen LED Embedded Software
 ------------------------------------------------
- 
+
 Title: Lumen LED Light Embedded Microcontroller Software
 Description: This file is used on the ATtiny45 microcontroller
 on the Lumen LED Light and controls the dimming of the light. It can be
@@ -27,131 +27,261 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
--------------------------------*/ 
+-------------------------------*/
 
-// HARDWARE PIN DEFINITIONS
-#define SIGNAL_PIN 0
-#define LED_PIN 1
-#define TEMP_PIN A1
+#include <util/atomic.h>
+#include "Lumen-Arduino.h"
+#include "LPFilter.h"
+#include "HystRound.h"
 
-// DIMMING CHARACTERISTICS
-// Temp to start dimming the lights at
-#define DIM_ADC 265 // 265 for 85C board temperature
-// Dimming gains
-#define DIM_KP 5.0
-#define DIM_KI 0.5
+// GLOBAL VARIABLES
+uint32_t lastfilterruntime    = 0;          // ms
+volatile uint32_t pulsetime   = 0;          // ms
+volatile int16_t  pulsein     = 0;          // us
 
-// OUTPUT LIMIT
-#define PWM_MIN 20 // 0-255
-#define PWM_MAX 230 // 0-255 - 230 for about 15W max
+LPFilter   inputfilter;
+HystRound  inputhysteretic;
+HystRound  temphysteretic;
 
-// SIGNAL CHARACTERISTICS
-#define PULSE_MIN 1120 // microseconds
-#define PULSE_MAX 1880 // microseconds
-#define PERIOD_MAX 400000ul // microseconds
+/*----------------------------------------------------------------------------*/
 
-float signal = 1100;
-int16_t pwm;
-float adc;
-float error;
-float control;
-float dimI;
-float maxPWM = 255;
-
-const float smoothAlpha = 0.02;
-
-// This function is needed as a consequence of the PixHawk having 3.3V
-// PWM logic as well as noise that gets into the signal from motors. 
-// It listens for a pulse and ignore noise within that pulse, even if 
-// the noise drops to a low logic level momentarily.
-int16_t pulseInNoiseReduced(uint8_t pin,uint32_t maxPeriod) {
-  uint32_t timeoutCounter = micros();
-  uint32_t risingEdge;
-  uint32_t fallingEdge;
-
-  // If we're in the middle of a pulse, wait till it's over
-  if ( digitalRead(pin) == HIGH ) {
-    delayMicroseconds(30000);
-  }
-
-  // Wait for the rising edge
-  while ( micros() - timeoutCounter < maxPeriod ) {
-    if ( digitalRead(pin) == HIGH ) {
-      risingEdge = micros();
-      fallingEdge = risingEdge;
-      break;
-    }
-  }
-
-  // Push back falling edge until it's been low for 50 µs
-  while ( micros() - timeoutCounter < maxPeriod ) {
-    if ( digitalRead(pin) == HIGH ) {
-      fallingEdge = micros();
-    }
-
-    if ( micros() - fallingEdge > 4000 ) {
-      return (fallingEdge - risingEdge)/8;
-    }
-  }
-
-  return 0;
-}
+///////////
+// SETUP //
+///////////
 
 void setup() {
-  pinMode(SIGNAL_PIN,INPUT);
-  pinMode(LED_PIN,OUTPUT); 
+  // Set pins to correct modes
+  pinMode(SIGNAL_PIN, INPUT );
+  pinMode(LED_PIN,    OUTPUT);
+  pinMode(TEMP_PIN,   INPUT );
 
-  // Setup up PWM on output pin: Set prescalar to 8 for 8M/8/256 = 3906 Hz
-  // The default analogWrite frequency can mess with cameras.
-  TCCR0B = _BV(CS01); // Set prescalar to 8 for 8M/8/256 = 3906 Hz
+  // Initialize PWM input reader
+  initializePWMReader();
+
+  // Initialize hardware timer1 for PWM output
+  initializePWMOutput();
+
+  // Initialize PWM input filter
+  inputfilter = LPFilter(FILTER_DT, FILTER_TAU, 0);
+
+  // Initialize input hysteresis rounder
+  inputhysteretic = HystRound(0, HYST_FACTOR);
+
+  // Initialize temperature hysteresis rounder
+  temphysteretic = HystRound(0, 8.0f);
 }
 
+
+//////////
+// LOOP //
+//////////
+
 void loop() {
-  // Read in PWM signal with low-pass filter for smoothing
-  signal = (1-smoothAlpha)*signal + smoothAlpha*pulseInNoiseReduced(SIGNAL_PIN,PERIOD_MAX);
+  // Declare local variables for holding large volatile variables
+  uint32_t lastpulsetime;
+  int16_t  lastpulsein;
 
-  // Determine appropriate output signal. 
-  if ( signal <= 500 ) {
-    // Allow light to be turned on by tying the signal pin high.
-    if ( digitalRead(SIGNAL_PIN) == HIGH ) {
-      pwm = PWM_MAX;
-    } else {
-      pwm = 0;
+  // Copy 16-bit and larger volatile variables to local variables
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    lastpulsetime = pulsetime;
+    lastpulsein   = pulsein;
+  }
+
+  // Make sure we're still receiving PWM inputs
+  if ( (adjustedMillis() - lastpulsetime)/1000.0f > INPUT_TIMEOUT ) {
+    // Reset last pulse time to now to keep from running every loop
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+      pulsetime = adjustedMillis();
     }
-  } else if ( signal < PULSE_MIN ) {
-    pwm = 0;
-  } else if ( signal > PULSE_MAX ) {
-    pwm = PWM_MAX;
+
+    // If it has been too long since the last input, check input PWM state
+    if ( digitalRead(SIGNAL_PIN) == HIGH ) {
+      // Turn LED on if the signal is still high (pulse is too long)
+      pulsein = PULSE_MAX;
+    } else {
+      // Otherwise turn off the LED (no pulse for a while)
+      pulsein = 0;
+    }
+  } // end pwm input check
+
+  // Run filters at specified interval
+  if ( (adjustedMillis() - lastfilterruntime)/1000.0f > FILTER_DT) {
+    // Set next filter runtime
+    lastfilterruntime = adjustedMillis();
+
+    // Calculate output limit to limit temperature
+    int maxinput = constrain(temphysteretic.hystRound((T_MAX - getTemp(TEMP_PIN))*T_KP), 0, N_STEPS-1);
+
+    // Declare local variables
+    float rawinput;
+
+    // Reject signals that are too short (i.e. const. 0 V, noise)
+    if ( lastpulsein >= PULSE_CUTOFF ) {
+      // Discretize valid PWM signals to [0, maxinput]
+      rawinput = constrain((float)(lastpulsein - PULSE_MIN)*(N_STEPS-1)
+        /(PULSE_MAX -PULSE_MIN), 0, maxinput);
+    } else {
+      // Set input to 0 (off) if invalid
+      rawinput = 0;
+    }
+
+    // Filter and apply hysteretic rounding to input
+    uint8_t input = inputhysteretic.hystRound(inputfilter.step(rawinput));
+
+    // Map input to brightness
+    uint8_t brightness = OUTPUT_MAX*expMap((float) input/(N_STEPS-1));
+
+    // Set output PWM timers
+    setBrightness(constrain(brightness, 0, OUTPUT_MAX));
+  } // end run filters
+} // end loop()
+
+
+/*----------------------------------------------------------------------------*/
+
+//////////////////////////
+// PWM Output Functions //
+//////////////////////////
+
+/******************************************************************************
+ * void initializePWMOutput()
+ *
+ * Sets timer1 registers for hardware PWM output
+ ******************************************************************************/
+void initializePWMOutput() {
+  // Stop interrupts while changing timer settings
+  cli();
+
+  // Use 0xFF (255) as top
+  bitClear(TCCR1, CTC1);
+
+  // Enable PWM A
+  bitSet  (TCCR1, PWM1A);
+
+  // Set timer1 clock source to prescaler 4 (8M/4/256 = 7812.5 Hz)
+  bitClear(TCCR1, CS13); // 0
+  bitClear(TCCR1, CS12); // 0
+  bitSet  (TCCR1, CS11); // 1
+  bitSet  (TCCR1, CS10); // 1
+
+  // Set non-inverting PWM mode, disable !OC1A (pin 0)
+  bitClear(TCCR1, COM1A0);
+  bitSet  (TCCR1, COM1A1);
+
+  // Disable OC1B and !OC1B (pins 3 & 4)
+  bitClear(GTCCR, COM1B0);
+  bitClear(GTCCR, COM1B1);
+
+  // Initialize to off
+  setBrightness(0);
+
+  // Done setting timers -> allow interrupts again
+  sei();
+}
+
+/******************************************************************************
+ * void setBrightness(uint8_t brightness)
+ *
+ * Sets the duty cycle (brightness) for the output pin (LED)
+ ******************************************************************************/
+void setBrightness(uint8_t brightness) {
+  OCR1A = brightness;
+}
+
+///////////////////////////
+// Input Timer Functions //
+///////////////////////////
+
+// Define global variables only used for input timer
+uint32_t inputpulsestart   = 0xFFFF;
+
+/******************************************************************************
+ * void initializePWMReader()
+ *
+ * Sets pin change interrupt and timer0 prescaler registers for PWM reader
+ ******************************************************************************/
+void initializePWMReader() {
+  // Enable pin change interrupts
+  bitSet(GIMSK, PCIE);
+
+  // Enable PCI for PWM input pin (PCINT0)
+  bitSet(PCMSK, PCINT0);
+
+  // Stop interrupts while changing timer settings
+  cli();
+
+  // Set timer0 prescaler to 8 (millis() and micros() will run 8x fast)
+  bitClear(TCCR0B, CS02); // 0
+  bitSet  (TCCR0B, CS01); // 1
+  bitClear(TCCR0B, CS00); // 0
+
+  // Done setting timers -> allow interrupts again
+  sei();
+}
+
+/******************************************************************************
+ * SIGNAL(PCINT0_vect)
+ *
+ * Pin change interrupt which measures the length of input PWM signals
+ ******************************************************************************/
+SIGNAL(PCINT0_vect) {
+  if ( digitalRead(SIGNAL_PIN) ) {
+    // If this was a rising edge
+    // Save the start time
+    inputpulsestart = adjustedMicros();
   } else {
-    pwm = map(signal,PULSE_MIN,PULSE_MAX,0,PWM_MAX);
+    // If this was a falling edge
+    // Ignore inputs that cross a rollover
+    if ( inputpulsestart < adjustedMicros() ) {
+      // Update pulse length
+      pulsein = adjustedMicros() - inputpulsestart;
+    }
+    pulsetime = adjustedMillis();
   }
+}
 
-  // PID controller to control max temperature limit. Not a very linear
-  // approach but it works well for this. This will basically control the 
-  // limit to maintain DIM_ADC temperature or better.
-  adc = adc*(1-smoothAlpha) + smoothAlpha*analogRead(TEMP_PIN);
-  error = DIM_ADC-adc;
+/******************************************************************************
+ * uint32_t adjustedMicros()
+ *
+ * Returns the time since this program started in microseconds, corrected for
+ * increased timer0 speed
+ ******************************************************************************/
+uint32_t adjustedMicros() {
+  return micros()/(64/TIM0_PRESCALE);
+}
 
-  dimI += error*0.005;
-  dimI = constrain(dimI,-255/abs(DIM_KI),255/abs(DIM_KI)); // Limit I-term spooling
+/******************************************************************************
+ * uint32_t adjustedMillis()
+ *
+ * Returns the time since this program started in milliseconds, corrected for
+ * increased timer0 speed
+ ******************************************************************************/
+uint32_t adjustedMillis() {
+  return millis()/(64/TIM0_PRESCALE);
+}
 
-  // Reset I after turning LED off
-  if ( pwm == 0 ) {
-    dimI = 0;
-  }
+/////////////////////////////
+// Miscellaneous Functions //
+/////////////////////////////
 
-  // Build control value
-  control = error*DIM_KP + dimI*DIM_KI;
+/******************************************************************************
+ * float expMap(float x)
+ *
+ * Maps input from [0, 1] to [0, 1] pseudo-exponentially
+ ******************************************************************************/
+float expMap(float x) {
+  return EXP_MAP_A0 + EXP_MAP_A1*x + EXP_MAP_A2*x*x + EXP_MAP_A3*x*x*x
+    + EXP_MAP_A4*x*x*x*x;
+}
 
-  // Apply control value to max PWM
-  maxPWM = constrain(255 - control,PWM_MIN,PWM_MAX);
+/******************************************************************************
+ * float getTemp(uint8_t pin)
+ *
+ * Returns the temperature of an NTC thermistor on given ADC input
+ ******************************************************************************/
+float getTemp(uint8_t pin) {
+  float adc = analogRead(pin);
+  float r   = (TEMP_SENSE_R*adc)/(ADC_MAX-adc);
 
-  // Output PWM to LED driver
-  if ( pwm > PWM_MIN ) {
-    analogWrite(LED_PIN, constrain(pwm,PWM_MIN,maxPWM));
-  } else {
-    digitalWrite(LED_PIN, LOW);
-  }
-
-  delay(1);
+  return 1.0f/(1.0f/NTC_T0 + log(r/NTC_R0)/NTC_B) - CELSIUS_0;
 }
